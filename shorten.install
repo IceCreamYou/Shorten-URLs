@@ -1,0 +1,18 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Uninstalls the Shorten module.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function shorten_uninstall() {
+  variable_del('shorten_www');
+  variable_del('shorten_method');
+  variable_del('shorten_service');
+  variable_del('shorten_show_service');
+  variable_del('shorten_service_backup');
+}
