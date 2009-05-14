@@ -90,7 +90,7 @@ function shorten_block($op = 'list', $delta = 0, $edit = array()) {
  * @return
  *   An abbreviated URL.
  */
-function shorten_shorten($original = '', $service = '') {
+function shorten_url($original = '', $service = '') {
   if (!$original) {
     global $base_url;
     $original = $base_url . base_path() . $_GET['q'];
@@ -172,7 +172,7 @@ function _shorten_get_url($original, $service) {
  * Implementation of hook_shorten_service().
  */
 function shorten_shorten_service($original) {
-  return array(
+  $services = array(
     'cli.gs' => 'http://cli.gs/api/v1/cligs/create?appid=drupal&url=',
     'hex.io' => 'http://hex.io/api-create.php?url=',
     'idek.net' => 'http://idek.net/c.php?idek-api=true&idek-ref=drupal_shorten_module&idek-url=',
@@ -192,6 +192,16 @@ function shorten_shorten_service($original) {
     'urlb.at' => 'http://urlb.at/api/rest/?url=',
     'urlCover' => 'http://urlcover.com/api.php?link=',
   );
+  if (module_exists('shorturl')) {
+    global $base_url;
+    $url = $base_url . base_path() . shorturl_shorten($original);
+    $services['Drupal ShortURL module'] = array(
+      'custom' => TRUE,
+      'url' => $url,
+    );
+  }
+  return $services;
+
   //The following services require API keys, and so are not normally used in
   //this module. Replace the relevant variables in the URLs below and move to
   //the above array to use.
@@ -224,6 +234,7 @@ function shorten_shorten_service($original) {
  *   An abbreviated URL or the original one if fetching methods are unavailable.
  */
 function shorten_fetch($url, $tag = '') {
+  //drupal_http_request() does not offer a reliable way to time out.
   if (variable_get('shorten_method', 'curl') == 'php') {
     $context = stream_context_create(array('http' => array('timeout' => 3))); 
     $contents = file_get_contents($url, 0, $context);
@@ -309,7 +320,7 @@ function shorten_form_shorten_submit($form, &$form_state) {
   if ($form_state['values']['service']) {
     $service = $form_state['values']['service'];
   }
-  $shortened = shorten_shorten($form_state['values']['url'], $service);
+  $shortened = shorten_url($form_state['values']['url'], $service);
   drupal_set_message(t('%original was shortened to %shortened', array('%original' => $form_state['values']['url'], '%shortened' => $shortened)));
 }
 
