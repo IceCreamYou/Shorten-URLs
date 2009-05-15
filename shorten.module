@@ -47,11 +47,17 @@ function shorten_menu() {
 function shorten_block($op = 'list', $delta = 0, $edit = array()) {
   if ($op == 'list') {
     $block['shorten']['info'] = t('Shorten URLs');
+    $block['shorten_short']['info'] = t('Short URL');
     return $block;
   }
   else if ($op == 'view' && $delta == 'shorten') {
     $block['subject'] = t('Shorten URLs');
     $block['content'] = shorten_form_display();
+    return $block;
+  }
+  else if ($op == 'view' && $delta == 'shorten_short') {
+    $block['subject'] = t('Short URL');
+    $block['content'] = drupal_get_form('shorten_current');
     return $block;
   }
   else if ($op == 'configure' && $delta == 'shorten') {
@@ -71,6 +77,9 @@ function shorten_block($op = 'list', $delta = 0, $edit = array()) {
       );
       return $form;
     }
+  }
+  else if ($op == 'configure' && $delta == 'shorten_short') {
+    drupal_set_message(t('This block displays the short URL for the page on which it is shown, which can slow down uncached pages in some instances.'));
   }
   else if ($op == 'save' && $delta == 'shorten') {
     variable_set('shorten_show_service', $edit['shorten_show_service']);
@@ -92,8 +101,7 @@ function shorten_block($op = 'list', $delta = 0, $edit = array()) {
  */
 function shorten_url($original = '', $service = '') {
   if (!$original) {
-    global $base_url;
-    $original = $base_url . base_path() . $_GET['q'];
+    $original = url($_GET['q'], array('absolute' => TRUE));
   }
   if (!$service) {
     $service = variable_get('shorten_service', 'is.gd');
@@ -193,8 +201,7 @@ function shorten_shorten_service($original) {
     'urlCover' => 'http://urlcover.com/api.php?link=',
   );
   if (module_exists('shorturl')) {
-    global $base_url;
-    $url = $base_url . base_path() . shorturl_shorten($original);
+    $url = url(shorturl_shorten($original), array('absolute' => TRUE));
     $services['Drupal ShortURL module'] = array(
       'custom' => TRUE,
       'url' => $url,
@@ -281,7 +288,7 @@ function shorten_form_display() {
 }
 
 /**
- * Form which allows shortening of a URL via the UI.
+ * Builds a form which allows shortening of a URL via the UI.
  */
 function shorten_form_shorten() {
   $form['url'] = array(
@@ -355,4 +362,16 @@ function _shorten_service_form() {
       );
     }
   }
+}
+
+/**
+ * Builds a textfield to show the short URL for the current page.
+ */
+function shorten_current(&$form_state) {
+  $form['shorten'] = array(
+    '#type' => 'textfield',
+    '#size' => 25,
+    '#default_value' => shorten_url(url($_GET['q'], array('absolute' => TRUE))),
+  );
+  return $form;
 }
