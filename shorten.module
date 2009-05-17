@@ -199,6 +199,7 @@ function shorten_shorten_service($original) {
     'tr.im' => 'http://api.tr.im/api/trim_simple?url=',
     'urlb.at' => 'http://urlb.at/api/rest/?url=',
     'urlCover' => 'http://urlcover.com/api.php?link=',
+    'urlShort' => 'http://u.mavrev.com/api.php?url=',
   );
   if (module_exists('shorturl')) {
     $url = url(shorturl_shorten($original), array('absolute' => TRUE));
