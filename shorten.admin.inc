@@ -10,7 +10,7 @@
  * Settings page.
  */
 function shorten_admin() {
-  $form['shorten_http'] = array(
+  $form['shorten_www'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use "www." instead of "http://"'),
     '#description' => t('"www." is shorter, but "http://" is automatically link-ified by more services.'),
