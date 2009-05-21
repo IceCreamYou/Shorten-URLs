@@ -24,7 +24,7 @@ function shorten_admin() {
     $methods['curl'] = t('cURL');
   }
   if (empty($methods)) {
-    if (variable_get('shorten_method', 'curl') != 'none') {
+    if (variable_get('shorten_method', _shorten_method_default()) != 'none') {
       variable_set('shorten_method', 'none');
     }
     $form['shorten_method'] = array(
@@ -57,7 +57,7 @@ function shorten_admin() {
       '#type' => 'radios',
       '#title' => t('Method'),
       '#description' => t('The method to use to retrieve the abbreviated URL.'),
-      '#default_value' => variable_get('shorten_method', 'curl'),
+      '#default_value' => variable_get('shorten_method', _shorten_method_default()),
       '#options' => $methods,
     );
     $all_services = module_invoke_all('shorten_service', $original);

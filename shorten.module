@@ -61,14 +61,7 @@ function shorten_block($op = 'list', $delta = 0, $edit = array()) {
     return $block;
   }
   else if ($op == 'configure' && $delta == 'shorten') {
-    $methods = array();
-    if (function_exists('file_get_contents')) {
-      $methods['php'] = t('PHP');
-    }
-    if (function_exists('curl_exec')) {
-      $methods['curl'] = t('cURL');
-    }
-    if (!empty($methods)) {
+    if (_shorten_method_default() != 'none') {
       $form['shorten_show_service'] = array(
         '#type' => 'checkbox',
         '#title' => t('Show the list of URL shortening services'),
@@ -141,7 +134,7 @@ function shorten_url($original = '', $service = '') {
  *   An abbreviated URL.
  */
 function _shorten_get_url($original, $service) {
-  $method = drupal_strtoupper(variable_get('shorten_method', 'curl'));
+  $method = drupal_strtoupper(variable_get('shorten_method', _shorten_method_default()));
   $services = module_invoke_all('shorten_service', $original);
   foreach ($services as $name => $api) {
     if ($service == $name) {
@@ -243,11 +236,11 @@ function shorten_shorten_service($original) {
  */
 function shorten_fetch($url, $tag = '') {
   //drupal_http_request() does not offer a reliable way to time out.
-  if (variable_get('shorten_method', 'curl') == 'php') {
+  if (variable_get('shorten_method', _shorten_method_default()) == 'php') {
     $context = stream_context_create(array('http' => array('timeout' => 3))); 
     $contents = file_get_contents($url, 0, $context);
   }
-  else if (variable_get('shorten_method', 'curl') == 'curl') {
+  else if (variable_get('shorten_method', _shorten_method_default()) == 'curl') {
     $c = curl_init();
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 3);
@@ -336,32 +329,23 @@ function shorten_form_shorten_submit($form, &$form_state) {
  * Form which displays a list of URL shortening services.
  */
 function _shorten_service_form() {
-  if (variable_get('shorten_show_service', FALSE)) {
-    $methods = array();
-    if (function_exists('file_get_contents')) {
-      $methods['php'] = t('PHP');
+  if (variable_get('shorten_show_service', FALSE) && _shorten_method_default() != 'none') {
+    $all_services = module_invoke_all('shorten_service', $original);
+    $services = array();
+    foreach ($all_services as $key => $value) {
+      $services[$key] = $key;
     }
-    if (function_exists('curl_exec')) {
-      $methods['curl'] = t('cURL');
+    $default = variable_get('shorten_service', 'is.gd');
+    if ($default == 'none') {
+      $default = 'TinyURL';
     }
-    if (!empty($methods)) {
-      $all_services = module_invoke_all('shorten_service', $original);
-      $services = array();
-      foreach ($all_services as $key => $value) {
-        $services[$key] = $key;
-      }
-      $default = variable_get('shorten_service', 'is.gd');
-      if ($default == 'none') {
-        $default = 'TinyURL';
-      }
-      return array(
-        '#type' => 'select',
-        '#title' => t('Service'),
-        '#description' => t('The service to use to shorten the URL.'),
-        '#default_value' => $default,
-        '#options' => $services,
-      );
-    }
+    return array(
+      '#type' => 'select',
+      '#title' => t('Service'),
+      '#description' => t('The service to use to shorten the URL.'),
+      '#default_value' => $default,
+      '#options' => $services,
+    );
   }
 }
 
@@ -375,4 +359,18 @@ function shorten_current(&$form_state) {
     '#default_value' => shorten_url(url($_GET['q'], array('absolute' => TRUE))),
   );
   return $form;
+}
+
+/**
+ * Determines the default method for retrieving shortened URLs.
+ * cURL is the preferred method, but sometimes it's not installed.
+ */
+function _shorten_method_default() {
+  if (function_exists('curl_exec')) {
+    return 'curl';
+  }
+  else if (function_exists('file_get_contents')) {
+    return 'php';
+  }
+  return 'none';
 }
