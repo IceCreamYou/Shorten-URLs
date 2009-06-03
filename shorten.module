@@ -8,7 +8,6 @@
 
 /**
  * @todo
- * - README.txt
  * - AHAHify the block form
  */
 
@@ -31,12 +30,18 @@ function shorten_help($path, $arg) {
 function shorten_menu() {
   $items = array();
   $items['admin/settings/shorten'] = array(
-    'title' => 'Shorten settings',
+    'title' => 'Shorten',
     'description' => 'Adjust certain display settings for Shorten.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('shorten_admin'),
     'access arguments' => array('access administration pages'),
     'file' => 'shorten.admin.inc',
+  );
+  $items['admin/settings/shorten/general'] = array(
+    'title' => 'General',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array('access administration pages'),
+    'weight' => -1,
   );
   return $items;
 }
@@ -119,6 +124,7 @@ function shorten_url($original = '', $service = '') {
   }
   $expire = time() + (60 * 60 * 24 * 7 * 3);
   cache_set($original, $url, 'cache', $expire);
+  module_invoke_all('shorten_create', $original, $url, $service);
   return $url;
 }
 
