@@ -291,6 +291,16 @@ function shorten_form_display() {
  * Builds a form which allows shortening of a URL via the UI.
  */
 function shorten_form_shorten() {
+  if ($_SESSION['shorten']) {
+    drupal_add_js(drupal_get_path('module', 'shorten') .'/shorten.js');
+    $form['shortened_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Shortened URL'),
+      '#default_value' => check_plain($_SESSION['shorten']),
+      '#size' => 25,
+    );
+    unset($_SESSION['shorten']);
+  }
   $form['url'] = array(
     '#type' => 'textfield',
     '#title' => t('URL'),
@@ -328,6 +338,10 @@ function shorten_form_shorten_submit($form, &$form_state) {
     $service = $form_state['values']['service'];
   }
   $shortened = shorten_url($form_state['values']['url'], $service);
+  $_SESSION['shorten'] = $shortened;
+  if ($form_state['values']['service']) {
+    $_SESSION['shorten_service'] = $form_state['values']['service'];
+  }
   drupal_set_message(t('%original was shortened to %shortened', array('%original' => $form_state['values']['url'], '%shortened' => $shortened)));
 }
 
@@ -344,6 +358,10 @@ function _shorten_service_form() {
     $default = variable_get('shorten_service', 'is.gd');
     if ($default == 'none') {
       $default = 'TinyURL';
+    }
+    //Remember the last service that was used.
+    if ($_SESSION['shorten_service']) {
+      $default = $_SESSION['shorten_service'];
     }
     return array(
       '#type' => 'select',
