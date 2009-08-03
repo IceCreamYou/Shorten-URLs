@@ -43,6 +43,12 @@ function shorten_menu() {
     'access arguments' => array('access administration pages'),
     'weight' => -1,
   );
+  $items['shorten'] = array(
+    'title' => 'Shorten URLs',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('shorten_form_shorten'),
+    'access arguments' => array('use Shorten URLs page'),
+  );
   return $items;
 }
 
@@ -82,6 +88,13 @@ function shorten_block($op = 'list', $delta = 0, $edit = array()) {
   else if ($op == 'save' && $delta == 'shorten') {
     variable_set('shorten_show_service', $edit['shorten_show_service']);
   }
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function shorten_perm() {
+  return array('use Shorten URLs page');
 }
 
 /**
@@ -307,6 +320,7 @@ function shorten_form_shorten() {
     '#default_value' => '',
     '#required' => TRUE,
     '#size' => 25,
+    '#maxlength' => 2048,
   );
   $service = _shorten_service_form();
   if (is_array($service)) {
