@@ -199,6 +199,7 @@ function shorten_shorten_service($original) {
     'is.gd' => 'http://is.gd/api.php?longurl=',
     'lin.cr' => 'http://lin.cr/?mode=api&full=1&l=',
     'Metamark' => 'http://metamark.net/api/rest/simple?long_url=',
+    'PeekURL' => 'http://peekurl.com/api.php?desturl=',
     'PiURL' => 'http://piurl.com/api.php?url=',
     'ri.ms' => 'http://ri.ms/api-create.php?url=',
     'short.ie' => array(
