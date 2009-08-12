@@ -415,3 +415,28 @@ function _shorten_method_default() {
   }
   return 'none';
 }
+
+/**
+ * Implementation of hook_token_list().
+ */
+function shorten_token_list($type = 'all') {
+  if ($type == 'node') {
+    $tokens['shorten'] = array(
+      'url' => t('The shortened URL for the node.'),
+    );
+    return $tokens;
+  }
+}
+
+/**
+ * Implementation of hook_token_values().
+ */
+function shorten_token_values($type, $data = NULL, $options = array()) {
+  if ($type == 'node') {
+    //Casting $data to an object may not be necessary.
+    $data = (object) $data;
+    return array(
+      'url' => shorten_url(url('node/'. $data->nid, array('absolute' => TRUE))),
+    );
+  }
+}
