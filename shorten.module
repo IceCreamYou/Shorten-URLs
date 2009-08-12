@@ -43,6 +43,15 @@ function shorten_menu() {
     'access arguments' => array('access administration pages'),
     'weight' => -1,
   );
+  $items['admin/settings/shorten/keys'] = array(
+    'title' => 'Shorten API Keys',
+    'description' => 'Fill in API keys to use certain services.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('shorten_keys'),
+    'access arguments' => array('manage Shorten URLs API keys'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'shorten.admin.inc',
+  );
   $items['shorten'] = array(
     'title' => 'Shorten URLs',
     'page callback' => 'drupal_get_form',
@@ -94,7 +103,7 @@ function shorten_block($op = 'list', $delta = 0, $edit = array()) {
  * Implementation of hook_perm().
  */
 function shorten_perm() {
-  return array('use Shorten URLs page');
+  return array('use Shorten URLs page', 'manage Shorten URLs API keys');
 }
 
 /**
@@ -192,21 +201,29 @@ function _shorten_get_url($original, $service) {
  * Implementation of hook_shorten_service().
  */
 function shorten_shorten_service($original) {
-  $services = array(
+  $services = array();
+  if (variable_get('shorten_adjix', '')) {
+    $services['Adjix.com'] = 'http://api.adjix.com/shrinkLink?ultraShort=y&partnerID='. variable_get('shorten_adjix', '') .'&url=';
+  }
+  if (variable_get('shorten_bitly_login', '') && variable_get('shorten_bitly_key', '')) {
+    $services['bit.ly'] = array(
+      'custom' => 'xml',
+      'url' => 'http://api.bit.ly/shorten?version=2.0.1&format=xml&login='. variable_get('shorten_bitly_login', '') .'&apiKey='. variable_get('shorten_bitly_key', '') .'&longUrl=',
+      'tag' => 'shortUrl',
+    );
+  }
+  $services += array(
     'cli.gs' => 'http://cli.gs/api/v1/cligs/create?appid=drupal&url=',
     'hex.io' => 'http://hex.io/api-create.php?url=',
-    'idek.net' => 'http://idek.net/c.php?idek-api=true&idek-ref=drupal_shorten_module&idek-url=',
+    'idek.net' => 'http://idek.net/c.php?idek-api=true&idek-ref=drupal&idek-url=',
     'is.gd' => 'http://is.gd/api.php?longurl=',
     'lin.cr' => 'http://lin.cr/?mode=api&full=1&l=',
     'Metamark' => 'http://metamark.net/api/rest/simple?long_url=',
     'PeekURL' => 'http://peekurl.com/api.php?desturl=',
     'PiURL' => 'http://piurl.com/api.php?url=',
+    'qr.cx' => 'http://qr.cx/api/?longurl=',
     'ri.ms' => 'http://ri.ms/api-create.php?url=',
-    'short.ie' => array(
-      'custom' => 'xml',
-      'url' => 'http://short.ie/api?url=',
-      'tag' => 'shortened',
-    ),
+    'short.ie' => 'http://short.ie/api?format=plain&url=',
     'th8.us' => 'http://th8.us/api.php?url=',
     'TinyURL' => 'http://tinyurl.com/api-create.php?url=',
     'tr.im' => 'http://api.tr.im/api/trim_simple?url=',
@@ -216,31 +233,16 @@ function shorten_shorten_service($original) {
   );
   if (module_exists('shorturl')) {
     $url = url(shorturl_shorten($original), array('absolute' => TRUE));
-    $services['Drupal ShortURL module'] = array(
+    $services['This site'] = array(
       'custom' => TRUE,
       'url' => $url,
     );
   }
+  if (variable_get('shorten_cligs', '')) {
+    $services['cli.gs'] = 'http://cli.gs/api/v1/cligs/create?appid=drupal&key='. variable_get('shorten_cligs', '') .'&url=';
+  }
   return $services;
-
-  //The following services require API keys, and so are not normally used in
-  //this module. Replace the relevant variables in the URLs below and move to
-  //the above array to use.
-  $other = array(
-    'Adjix.com' => "http://api.adjix.com/shrinkLink?ultraShort=y&partnerID=$adjix_id&url=",
-    'bit.ly' => array(
-      'custom' => 'xml',
-      'url' => "http://api.bit.ly/shorten?version=2.0.1&format=xml&login=$bitly_name&apiKey=$bitly_key&longUrl=",
-    ),
-  );
-  //When tested on May 9, 2009, snurl worked, but the documentation says it's
-  //deprecated, so it could be removed at any time. WapURL will soon require
-  //registration to use according to the documentation.
-  $deprecated = array(
-    'snurl' => 'http://snipurl.com/site/snip?r=simple&link=',
-    'WapURL' => 'http://wapURL.co.uk//api.cfm?URLToConvert=',
-  );
-  //Shorten cannot and will not handle $_POST requests.
+  //tweetburner.com and snurl.com use POST requests.
 }
 
 /**

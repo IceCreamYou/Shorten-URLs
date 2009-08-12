@@ -9,7 +9,7 @@
 /**
  * Settings page.
  */
-function shorten_admin() {
+function shorten_admin($form_state) {
   $form['shorten_www'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use "www." instead of "http://"'),
@@ -100,11 +100,39 @@ function shorten_admin_validate($form, &$form_state) {
  * Submit handler for shorten_admin().
  */
 function shorten_admin_submit($form, &$form_state) {
-  variable_set('shorten_method', $form_state['values']['shorten_method']);
-  variable_set('shorten_service', $form_state['values']['shorten_service']);
-  variable_set('shorten_service_backup', $form_state['values']['shorten_service_backup']);
-  variable_set('shorten_www', $form_state['values']['shorten_www']);
   //Clear the general cache because changed settings may mean that different URLs should be used.
   cache_clear_all('*', 'cache', TRUE);
-  drupal_set_message(t('The configuration options have been saved.'));
+}
+
+/**
+ * Keys page.
+ */
+function shorten_keys($form_state) {
+  $form['shorten_adjix'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Adjix Partner ID'),
+    '#default_value' => variable_get('shorten_adjix', ''),
+  );
+  $form['shorten_bitly'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Bitly'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['shorten_bitly']['shorten_bitly_login'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Bit.ly Login'),
+    '#default_value' => variable_get('shorten_bitly_login', ''),
+  );
+  $form['shorten_bitly']['shorten_bitly_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Bit.ly API Key'),
+    '#default_value' => variable_get('shorten_bitly_key', ''),
+  );
+  $form['shorten_cligs'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cligs API Key'),
+    '#default_value' => variable_get('shorten_cligs', ''),
+  );
+  return system_settings_form($form);
 }
