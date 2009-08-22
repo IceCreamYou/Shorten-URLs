@@ -208,7 +208,7 @@ function shorten_shorten_service($original) {
   if (variable_get('shorten_bitly_login', '') && variable_get('shorten_bitly_key', '')) {
     $services['bit.ly'] = array(
       'custom' => 'xml',
-      'url' => 'http://api.bit.ly/shorten?version=2.0.1&format=xml&login='. variable_get('shorten_bitly_login', '') .'&apiKey='. variable_get('shorten_bitly_key', '') .'&longUrl=',
+      'url' => 'http://api.bit.ly/shorten?version=2.0.1&format=xml&history=1&login='. variable_get('shorten_bitly_login', '') .'&apiKey='. variable_get('shorten_bitly_key', '') .'&longUrl=',
       'tag' => 'shortUrl',
     );
   }
