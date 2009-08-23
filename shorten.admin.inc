@@ -134,5 +134,10 @@ function shorten_keys($form_state) {
     '#title' => t('Cligs API Key'),
     '#default_value' => variable_get('shorten_cligs', ''),
   );
+  $form['shorten_redirec'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Redir.ec API Key'),
+    '#default_value' => variable_get('shorten_redirec', ''),
+  );
   return system_settings_form($form);
 }

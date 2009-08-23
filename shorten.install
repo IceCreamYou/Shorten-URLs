@@ -14,6 +14,7 @@ function shorten_uninstall() {
   variable_del('shorten_adjix');
   variable_del('shorten_cligs');
   variable_del('shorten_method');
+  variable_del('shorten_redirec');
   variable_del('shorten_service');
   variable_del('shorten_bitly_key');
   variable_del('shorten_bitly_login');

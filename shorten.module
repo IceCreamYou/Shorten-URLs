@@ -222,6 +222,7 @@ function shorten_shorten_service($original) {
     'PeekURL' => 'http://peekurl.com/api.php?desturl=',
     'PiURL' => 'http://piurl.com/api.php?url=',
     'qr.cx' => 'http://qr.cx/api/?longurl=',
+    'redir.ec' => 'http://redir.ec/_api/rest/redirec/create?appid=drupal&url=',
     'ri.ms' => 'http://ri.ms/api-create.php?url=',
     'short.ie' => 'http://short.ie/api?format=plain&url=',
     'th8.us' => 'http://th8.us/api.php?url=',
@@ -240,6 +241,9 @@ function shorten_shorten_service($original) {
   }
   if (variable_get('shorten_cligs', '')) {
     $services['cli.gs'] = 'http://cli.gs/api/v1/cligs/create?appid=drupal&key='. variable_get('shorten_cligs', '') .'&url=';
+  }
+  if (variable_get('shorten_redirec', '')) {
+    $services['redir.ec'] = 'http://redir.ec/_api/rest/redirec/create?appid=drupal&apikey='. variable_get('shorten_redirec', '') .'&url=';
   }
   return $services;
   //tweetburner.com and snurl.com use POST requests.
