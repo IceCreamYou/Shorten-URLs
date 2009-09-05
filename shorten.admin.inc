@@ -115,7 +115,7 @@ function shorten_keys($form_state) {
   );
   $form['shorten_bitly'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Bitly'),
+    '#title' => t('Bit.ly and j.mp'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
