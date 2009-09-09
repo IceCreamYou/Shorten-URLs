@@ -348,10 +348,20 @@ function shorten_form_shorten() {
 
 /**
  * Validate function for the Shorten form.
+ * It's hard to really figure out what a valid URL is. We might reasonably
+ * expect http://example.com, https://example.com, www.example.com, or even
+ * just example.com to be correctly shortened by respective services. So instead
+ * of dealing with this logic ourselves, we just check that there is at least a
+ * period in the string, because there must be a TLD, and we check length.
  */
 function shorten_form_shorten_validate($form, &$form_state) {
   $url = $form_state['values']['url'];
-  if (drupal_substr($url, 0, 7) != 'http://' && drupal_substr($url, 0, 8) != 'https://' && strpos($url, '.', 9)) {
+  if (drupal_strlen($url) > 4) {
+    if (!strpos($url, '.', 1)) {
+      form_set_error('url', t('Please enter a valid URL.'));
+    }
+  }
+  else {
     form_set_error('url', t('Please enter a valid URL.'));
   }
 }
