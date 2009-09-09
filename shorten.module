@@ -227,6 +227,7 @@ function shorten_shorten_service($original) {
     'PiURL' => 'http://piurl.com/api.php?url=',
     'qr.cx' => 'http://qr.cx/api/?longurl=',
     'redir.ec' => 'http://redir.ec/_api/rest/redirec/create?appid=drupal&url=',
+    'retwt.me' => array('custom' => 'xml', 'url' => 'http://api.retwt.me/shorten.xml?longUrl=', 'tag' => 'shortUrl'),
     'ri.ms' => 'http://ri.ms/api-create.php?url=',
     'short.ie' => 'http://short.ie/api?format=plain&url=',
     'th8.us' => 'http://th8.us/api.php?url=',
@@ -249,8 +250,9 @@ function shorten_shorten_service($original) {
   if (variable_get('shorten_redirec', '')) {
     $services['redir.ec'] = 'http://redir.ec/_api/rest/redirec/create?appid=drupal&apikey='. variable_get('shorten_redirec', '') .'&url=';
   }
+  //Alphabetize. ksort() is case-sensitive.
+  uksort($services, 'strcasecmp');
   return $services;
-  //tweetburner.com and snurl.com use POST requests.
 }
 
 /**
