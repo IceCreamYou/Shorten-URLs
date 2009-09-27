@@ -56,7 +56,7 @@ function shorten_admin($form_state) {
     $form['shorten_method'] = array(
       '#type' => 'radios',
       '#title' => t('Method'),
-      '#description' => t('The method to use to retrieve the abbreviated URL.'),
+      '#description' => t('The method to use to retrieve the abbreviated URL. cURL is much faster, if available.'),
       '#default_value' => variable_get('shorten_method', _shorten_method_default()),
       '#options' => $methods,
     );
