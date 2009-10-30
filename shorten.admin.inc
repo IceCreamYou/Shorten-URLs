@@ -84,7 +84,7 @@ function shorten_admin($form_state) {
   $form['shorten_generate_token'] = array(
     '#type' => 'checkbox',
     '#title' => t('Generate a shortened URL for nodes for use as tokens'),
-    '#description' => t('This option could create a lot of little-used short URLs. However, performance load is minimized because the shortened URLs are cached. Note that if you turn this off, you should not use the [shorten:url] token.'),
+    '#description' => t('This option could create a lot of little-used short URLs. However, performance load is minimized because the shortened URLs are cached. Note that if you turn this off, you should not use the [node:url] token.'),
     '#default_value' => variable_get('shorten_generate_token', 1),
   );
   return system_settings_form($form);
