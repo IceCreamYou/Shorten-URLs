@@ -440,7 +440,7 @@ function _shorten_method_default() {
  * Implementation of hook_token_list().
  */
 function shorten_token_list($type = 'all') {
-  if ($type == 'node') {
+  if ($type == 'node' && variable_get('shorten_generate_token', 1)) {
     $tokens['shorten'] = array(
       'url' => t('The shortened URL for the node.'),
     );
@@ -452,7 +452,7 @@ function shorten_token_list($type = 'all') {
  * Implementation of hook_token_values().
  */
 function shorten_token_values($type, $data = NULL, $options = array()) {
-  if ($type == 'node') {
+  if ($type == 'node' && variable_get('shorten_generate_token', 1)) {
     //Casting $data to an object may not be necessary.
     $data = (object) $data;
     return array(
