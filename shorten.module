@@ -70,17 +70,17 @@ function shorten_block($op = 'list', $delta = 0, $edit = array()) {
     $block['shorten_short']['info'] = t('Short URL');
     return $block;
   }
-  else if ($op == 'view' && $delta == 'shorten') {
+  elseif ($op == 'view' && $delta == 'shorten') {
     $block['subject'] = t('Shorten URLs');
     $block['content'] = shorten_form_display();
     return $block;
   }
-  else if ($op == 'view' && $delta == 'shorten_short') {
+  elseif ($op == 'view' && $delta == 'shorten_short') {
     $block['subject'] = t('Short URL');
     $block['content'] = drupal_get_form('shorten_current');
     return $block;
   }
-  else if ($op == 'configure' && $delta == 'shorten') {
+  elseif ($op == 'configure' && $delta == 'shorten') {
     if (_shorten_method_default() != 'none') {
       $form['shorten_show_service'] = array(
         '#type' => 'checkbox',
@@ -91,10 +91,10 @@ function shorten_block($op = 'list', $delta = 0, $edit = array()) {
       return $form;
     }
   }
-  else if ($op == 'configure' && $delta == 'shorten_short') {
+  elseif ($op == 'configure' && $delta == 'shorten_short') {
     drupal_set_message(t('This block displays the short URL for the page on which it is shown, which can slow down uncached pages in some instances.'));
   }
-  else if ($op == 'save' && $delta == 'shorten') {
+  elseif ($op == 'save' && $delta == 'shorten') {
     variable_set('shorten_show_service', $edit['shorten_show_service']);
   }
 }
@@ -170,15 +170,15 @@ function _shorten_get_url($original, $service) {
         $url = shorten_fetch($api . $original);
         break;
       }
-      else if (is_array($api) && $api['custom'] === 'xml') {
+      elseif (is_array($api) && $api['custom'] === 'xml') {
         $url = shorten_fetch($api['url'] . $original, $api['tag']);
         break;
       }
-      else if (is_array($api) && $api['custom'] === FALSE) {
+      elseif (is_array($api) && $api['custom'] === FALSE) {
         $url = shorten_fetch($api['url'] . $original);
         break;
       }
-      else if (is_array($api) && $api['custom'] === TRUE) {
+      elseif (is_array($api) && $api['custom'] === TRUE) {
         $url = $api['url'];
         $method = t('A custom method');
         break;
@@ -272,7 +272,7 @@ function shorten_fetch($url, $tag = '') {
     $context = stream_context_create(array('http' => array('timeout' => 3))); 
     $contents = file_get_contents($url, 0, $context);
   }
-  else if (variable_get('shorten_method', _shorten_method_default()) == 'curl') {
+  elseif (variable_get('shorten_method', _shorten_method_default()) == 'curl') {
     $c = curl_init();
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 3);
@@ -430,7 +430,7 @@ function _shorten_method_default() {
   if (function_exists('curl_exec')) {
     return 'curl';
   }
-  else if (function_exists('file_get_contents')) {
+  elseif (function_exists('file_get_contents')) {
     return 'php';
   }
   return 'none';
