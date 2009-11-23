@@ -60,7 +60,7 @@ function shorten_admin($form_state) {
       '#default_value' => variable_get('shorten_method', _shorten_method_default()),
       '#options' => $methods,
     );
-    $all_services = module_invoke_all('shorten_service', $original);
+    $all_services = module_invoke_all('shorten_service');
     $services = array();
     foreach ($all_services as $key => $value) {
       $services[$key] = $key;
@@ -81,11 +81,24 @@ function shorten_admin($form_state) {
       '#options' => $services,
     );
   }
-  $form['shorten_generate_token'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Generate a shortened URL for nodes for use as tokens'),
-    '#description' => t('This option could create a lot of little-used short URLs. However, performance load is minimized because the shortened URLs are cached. Note that if you turn this off, you should not use the [node:url] token.'),
-    '#default_value' => variable_get('shorten_generate_token', 1),
+  if (module_exists('token')) {
+    $form['shorten_generate_token'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Generate a shortened URL for nodes for use as tokens'),
+      '#description' => t('This option could create a lot of little-used short URLs. '.
+        'However, performance load is minimized because the shortened URLs are cached. '.
+        'Note that if you turn this off, you should not use the [node:url] token.'),
+      '#default_value' => variable_get('shorten_generate_token', 1),
+    );
+  }
+  unset($services['none']);
+  $form['shorten_invisible_services'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Disallowed services'),
+    '#description' => t('Checking the box next to a service will make it <strong>unavailable</strong> for use in the Shorten URLs block and page. '.
+      'If you disallow all services, the primary service will be used.'),
+    '#default_value' => variable_get('shorten_invisible_services', array()),
+    '#options' => $services,
   );
   return system_settings_form($form);
 }
@@ -94,11 +107,18 @@ function shorten_admin($form_state) {
  * Validation handler for shorten_admin().
  */
 function shorten_admin_validate($form, &$form_state) {
-  if ($form_state['values']['shorten_service'] == $form_state['values']['shorten_service_backup'] && $form_state['values']['shorten_service_backup'] != 'none') {
+  $v = $form_state['values'];
+  if ($v['shorten_service'] == $v['shorten_service_backup'] && $v['shorten_service_backup'] != 'none') {
     form_set_error('shorten_service_backup', t('You must select a backup abbreviation service that is different than your primary service.'));
   }
-  if ($form_state['values']['shorten_service'] == 'none' && $form_state['values']['shorten_service_backup'] != 'none') {
-    drupal_set_message(t('You have selected a backup URL abbreviation service, but no primary service.  Your URLs will not be abbreviated with these settings.'));
+  elseif (($v['shorten_service'] == 'bit.ly' && $v['shorten_service_backup'] == 'j.mp') ||
+    ($v['shorten_service'] == 'j.mp' && $v['shorten_service_backup'] == 'bit.ly')) {
+    form_set_error('shorten_service_backup', t('j.mp and bit.ly are the same service. '.
+      'You must select a backup abbreviation service that is different than your primary service.'));
+  }
+  if ($v['shorten_service'] == 'none' && $v['shorten_service_backup'] != 'none') {
+    drupal_set_message(t('You have selected a backup URL abbreviation service, but no primary service. '.
+      'Your URLs will not be abbreviated with these settings.'));
   }
 }
 

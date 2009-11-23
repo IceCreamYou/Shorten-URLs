@@ -1,11 +1,16 @@
 // $Id$
 
 Drupal.behaviors.shorten = function (context) {
-  var input = $('#edit-shortened-url')[0];
-  input.select();
-  input.focus();
+  shorten = $('#edit-shortened-url')[0];
+  if (shorten) {
+    shorten.select();
+    shorten.focus();
+  }
   $('#edit-shortened-url').click(function() {
-    input.select();
-    input.focus();
+    shorten.select();
+    shorten.focus();
+  });
+  $('#edit-this-shortened').click(function() {
+    $('#edit-this-shortened')[0].select().focus();
   });
 }

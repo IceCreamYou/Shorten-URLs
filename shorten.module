@@ -54,11 +54,23 @@ function shorten_menu() {
   );
   $items['shorten'] = array(
     'title' => 'Shorten URLs',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('shorten_form_shorten'),
+    'page callback' => 'shorten_form_display',
     'access arguments' => array('use Shorten URLs page'),
   );
+  $items['shorten/js'] = array(
+    'title' => 'Save Shorten form',
+    'page callback' => 'shorten_save_js',
+    'access callback' => '_shorten_true',
+    'type' => MENU_CALLBACK,
+  );
   return $items;
+}
+
+/**
+ * Access callback for the JS page.
+ */
+function _shorten_true() {
+  return TRUE;
 }
 
 /**
@@ -67,6 +79,8 @@ function shorten_menu() {
 function shorten_block($op = 'list', $delta = 0, $edit = array()) {
   if ($op == 'list') {
     $block['shorten']['info'] = t('Shorten URLs');
+    $block['shorten']['visibility'] = 0;
+    $block['shorten']['pages'] = 'shorten';
     $block['shorten_short']['info'] = t('Short URL');
     return $block;
   }
@@ -130,10 +144,16 @@ function shorten_url($original = '', $service = '') {
   if ($cached->data) {
     return $cached->data;
   }
-  $url = _shorten_get_url($original, $service);
+  $services = module_invoke_all('shorten_service');
+  if (isset($services[$service])) {
+    $url = _shorten_get_url($original, $services[$service]);
+  }
   //If the primary service fails, try the secondary service.
   if (!$url) {
-    $url = _shorten_get_url($original, variable_get('shorten_service_backup', 'TinyURL'));
+    $service = variable_get('shorten_service_backup', 'TinyURL');
+    if (isset($services[$service])) {
+      $url = _shorten_get_url($original, $services[$service]);
+    }
     //If the secondary service fails, use the original URL.
     if (!$url) {
       $url = $original;
@@ -155,33 +175,44 @@ function shorten_url($original = '', $service = '') {
  *
  * @param $original
  *   The URL of the page for which to retrieve the abbreviated URL.
- * @param $service
- *   The service to use to abbreviate the URL.
- *   For services available by default, see shorten_shorten_service().
+ * @param $api
+ *   A string or array used to retrieve a shortened URL. If it is an array, it
+ *   can have the elements 'custom,' 'url,' 'tag,' 'json,' and 'args.'
  * @return
  *   An abbreviated URL.
  */
-function _shorten_get_url($original, $service) {
+function _shorten_get_url($original, $api) {
   $method = drupal_strtoupper(variable_get('shorten_method', _shorten_method_default()));
-  $services = module_invoke_all('shorten_service', $original);
-  foreach ($services as $name => $api) {
-    if ($service == $name) {
-      if (is_string($api)) {
-        $url = shorten_fetch($api . $original);
-        break;
-      }
-      elseif (is_array($api) && $api['custom'] === 'xml') {
+  if (is_string($api)) {
+    $url = shorten_fetch($api . $original);
+  }
+  elseif (is_array($api)) {
+    //Merge in defaults.
+    $api += array(
+      'custom' => FALSE,
+      'json' => FALSE,
+    );
+    if ($api['url']) {
+      //Typically $api['custom'] == 'xml' although it doesn't have to.
+      if (!empty($api['tag'])) {
         $url = shorten_fetch($api['url'] . $original, $api['tag']);
-        break;
       }
-      elseif (is_array($api) && $api['custom'] === FALSE) {
+      elseif (!empty($api['json'])) {
+        $url = shorten_fetch($api['url'] . $original, $api['json'], 'json');
+      }
+      elseif (!$api['custom']) {
         $url = shorten_fetch($api['url'] . $original);
-        break;
       }
-      elseif (is_array($api) && $api['custom'] === TRUE) {
-        $url = $api['url'];
-        $method = t('A custom method');
-        break;
+    }
+    elseif (is_string($api['custom']) && function_exists($api['custom'])) {
+      $method =  t('A custom method: @method()', array('@method' => $api['custom']));
+      if (is_array($api['args'])) {
+        $args = $api['args'];
+        array_unshift($args, $original);
+        $url = call_user_func_array($api['custom'], $args);
+      }
+      else {
+        $url = call_user_func($api['custom'], $original);
       }
     }
   }
@@ -200,7 +231,7 @@ function _shorten_get_url($original, $service) {
 /**
  * Implementation of hook_shorten_service().
  */
-function shorten_shorten_service($original) {
+function shorten_shorten_service() {
   $services = array();
   if (variable_get('shorten_adjix', '')) {
     $services['Adjix.com'] = 'http://api.adjix.com/shrinkLink?ultraShort=y&partnerID='. variable_get('shorten_adjix', '') .'&url=';
@@ -212,8 +243,7 @@ function shorten_shorten_service($original) {
       'tag' => 'shortUrl',
     );
     $services['j.mp'] = array(
-      'custom' => TRUE,
-      'url' => 'http://j.mp/'. shorten_fetch('http://api.bit.ly/shorten?version=2.0.1&format=xml&history=1&login='. variable_get('shorten_bitly_login', '') .'&apiKey='. variable_get('shorten_bitly_key', '') .'&longUrl='. $original, 'userHash'),
+      'custom' => '_shorten_jmp',
     );
   }
   $services += array(
@@ -238,10 +268,8 @@ function shorten_shorten_service($original) {
     'urlShort' => 'http://u.mavrev.com/api.php?url=',
   );
   if (module_exists('shorturl')) {
-    $url = url(shorturl_shorten($original), array('absolute' => TRUE));
     $services['This site'] = array(
-      'custom' => TRUE,
-      'url' => $url,
+      'custom' => '_shorten_shorturl',
     );
   }
   if (variable_get('shorten_cligs', '')) {
@@ -256,6 +284,27 @@ function shorten_shorten_service($original) {
 }
 
 /**
+ * Helps get a shortened URL from j.mp.
+ */
+function _shorten_jmp($original) {
+  $url = 'http://api.bit.ly/shorten?version=2.0.1&format=xml&history=1&login='.
+    variable_get('shorten_bitly_login', '') .'&apiKey='.
+    variable_get('shorten_bitly_key', '') .'&longUrl='. $original;
+  $bitly = shorten_fetch($url, 'userHash');
+  if ($bitly) {
+    return 'http://j.mp/'. $bitly;
+  }
+  drupal_set_message('error fetching j.mp code from bit.ly using '. $url);
+}
+
+/**
+ * Helps get a shortened URL via the Short URLs module.
+ */
+function _shorten_shorturl($original) {
+  return url(shorturl_shorten($original), array('absolute' => TRUE));
+}
+
+/**
  * Downloads the response of the URL abbreviation service.
  *
  * @param $url
@@ -263,10 +312,12 @@ function shorten_shorten_service($original) {
  *   both the service and the URL to be shortened.
  * @param $tag
  *   If the response is XML, the tag within which to look for the shortened URL.
+ * @param $special
+ *   A special format the service will return. Currently only supports 'json.'
  * @return
  *   An abbreviated URL or the original one if fetching methods are unavailable.
  */
-function shorten_fetch($url, $tag = '') {
+function shorten_fetch($url, $tag = '', $special = '') {
   //drupal_http_request() does not offer a reliable way to time out.
   if (variable_get('shorten_method', _shorten_method_default()) == 'php') {
     $context = stream_context_create(array('http' => array('timeout' => 3))); 
@@ -284,7 +335,13 @@ function shorten_fetch($url, $tag = '') {
     $contents = $url;
   }
   if ($tag) {
-    $contents = _shorten_xml($contents, $tag);
+    if (!$special) {
+      $contents = _shorten_xml($contents, $tag);
+    }
+    elseif ($special == 'json') {
+      $contents = json_decode($contents, TRUE);
+      $contents = $contents[$tag];
+    }
   }
   return $contents;
 }
@@ -317,8 +374,15 @@ function shorten_form_display() {
  * Builds a form which allows shortening of a URL via the UI.
  */
 function shorten_form_shorten() {
+  $form['#cache'] = TRUE;
+  //Form elements between ['opendiv'] and ['closediv'] will be refreshed via AHAH on form submission.
+  $form['opendiv'] = array(
+    '#value' => '<div id="shorten_replace">',
+  );
   if ($_SESSION['shorten']) {
-    drupal_add_js(drupal_get_path('module', 'shorten') .'/shorten.js');
+    if (arg(0) != 'shorten' && arg(1) != 'js') {
+      drupal_add_js(drupal_get_path('module', 'shorten') .'/shorten.js');
+    }
     $form['shortened_url'] = array(
       '#type' => 'textfield',
       '#title' => t('Shortened URL'),
@@ -335,6 +399,10 @@ function shorten_form_shorten() {
     '#size' => 25,
     '#maxlength' => 2048,
   );
+  //Form elements between ['opendiv'] and ['closediv'] will be refreshed via AHAH on form submission.
+  $form['closediv'] = array(
+    '#value' => '</div>',
+  );
   $service = _shorten_service_form();
   if (is_array($service)) {
     $form['service'] = $service;
@@ -342,6 +410,12 @@ function shorten_form_shorten() {
   $form['shorten'] = array(
     '#type' => 'submit',
     '#value' => t('Shorten'),
+    '#ahah' => array(
+      'path' => 'shorten/js',
+      'wrapper' => 'shorten_replace',
+      'effect' => 'fade',
+      'method' => 'replace',
+    ),
   );
   return $form;
 }
@@ -379,7 +453,38 @@ function shorten_form_shorten_submit($form, &$form_state) {
   if ($form_state['values']['service']) {
     $_SESSION['shorten_service'] = $form_state['values']['service'];
   }
+  $form_state['rebuild'] = TRUE;
   drupal_set_message(t('%original was shortened to %shortened', array('%original' => $form_state['values']['url'], '%shortened' => $shortened)));
+}
+
+/**
+ * JS callback for submitting the Shorten form.
+ */
+function shorten_save_js() {
+  $form_state = array('storage' => NULL, 'submitted' => FALSE);
+  $form_build_id = $_POST['form_build_id'];
+  $form = form_get_cache($form_build_id, $form_state);
+  $form_state['post'] = $form['#post'] = $_POST;
+  $form['#programmed'] = $form['#redirect'] = FALSE;
+  $args = $form['#parameters'];
+  //This happens if someone goes directly to the JS processing page.
+  if (!is_array($args) && !$args) {
+    drupal_goto('shorten');
+    watchdog('shorten', 'Someone tried to access the JavaScript processing page for the Shorten module directly.', array(), WATCHDOG_DEBUG);
+    return;
+  }
+  $form_id = array_shift($args);
+  drupal_process_form($form_id, $form, $form_state);
+  $form = drupal_rebuild_form($form_id, $form_state, $args, $form_build_id);
+  //Get HTML for the replacement form. Only these elements will be AHAH-refreshed.
+  $new_form['shortened_url'] = $form['shortened_url'];
+  $new_form['url'] = $form['url'];
+  //If the $form['save']['#ahah']['wrapper'] div was found in a #prefix or #suffix of a form element that we re-rendered here,
+  //then we would have to unset() it to prevent duplicate wrappers. However, we have a somewhat unique implementation in which the wrappers
+  //are actually their own elements, so this is not an issue.
+  $output = theme('status_messages') . drupal_render($new_form);
+  //Return the results.
+  drupal_json(array('status' => TRUE, 'data' => $output));
 }
 
 /**
@@ -387,10 +492,13 @@ function shorten_form_shorten_submit($form, &$form_state) {
  */
 function _shorten_service_form() {
   if (variable_get('shorten_show_service', FALSE) && _shorten_method_default() != 'none') {
-    $all_services = module_invoke_all('shorten_service', $original);
+    $all_services = module_invoke_all('shorten_service');
     $services = array();
+    $disallowed = variable_get('shorten_invisible_services', array());
     foreach ($all_services as $key => $value) {
-      $services[$key] = $key;
+      if (!$disallowed[$key]) {
+        $services[$key] = $key;
+      }
     }
     $default = variable_get('shorten_service', 'is.gd');
     if ($default == 'none') {
@@ -400,12 +508,29 @@ function _shorten_service_form() {
     if ($_SESSION['shorten_service']) {
       $default = $_SESSION['shorten_service'];
     }
+    $count = count($services);
+    if ($count > 1) {
+      if (!$services[$default]) {
+        unset($default);
+      }
+      return array(
+        '#type' => 'select',
+        '#title' => t('Service'),
+        '#description' => t('The service to use to shorten the URL.'),
+        '#required' => TRUE,
+        '#default_value' => $default,
+        '#options' => $services,
+      );
+    }
+    elseif ($count) {
+      return array(
+        '#type' => 'value',
+        '#value' => array_pop($services),
+      );
+    }
     return array(
-      '#type' => 'select',
-      '#title' => t('Service'),
-      '#description' => t('The service to use to shorten the URL.'),
-      '#default_value' => $default,
-      '#options' => $services,
+      '#type' => 'value',
+      '#value' => $default,
     );
   }
 }
@@ -414,7 +539,8 @@ function _shorten_service_form() {
  * Builds a textfield to show the short URL for the current page.
  */
 function shorten_current(&$form_state) {
-  $form['shorten'] = array(
+  drupal_add_js(drupal_get_path('module', 'shorten') .'/shorten.js');
+  $form['this_shortened'] = array(
     '#type' => 'textfield',
     '#size' => 25,
     '#default_value' => shorten_url(url($_GET['q'], array('absolute' => TRUE))),
