@@ -294,7 +294,7 @@ function _shorten_jmp($original) {
   if ($bitly) {
     return 'http://j.mp/'. $bitly;
   }
-  drupal_set_message('error fetching j.mp code from bit.ly using '. $url);
+  drupal_set_message(t('error fetching j.mp code from bit.ly using @url', array('@url' => $url)));
 }
 
 /**
