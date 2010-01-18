@@ -221,7 +221,7 @@ function _shorten_get_url($original, $api) {
     return $original;
   }
 
-  if ($url && drupal_substr($url, 0, 7) == 'http://') {
+  if ($url && (drupal_substr($url, 0, 7) == 'http://' || drupal_substr($url, 0, 8) == 'https://')) {
     return $url;
   }
   watchdog('shorten', '%method failed to return an abbreviated URL from %service.', array('%method' => $method, '%service' => $service), WATCHDOG_NOTICE, $url);
