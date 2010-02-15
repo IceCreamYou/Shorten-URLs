@@ -238,7 +238,9 @@ function _shorten_get_url($original, $api) {
 function shorten_shorten_service() {
   $services = array();
   if (variable_get('shorten_adjix', '')) {
-    $services['Adjix.com'] = 'http://api.adjix.com/shrinkLink?ultraShort=y&partnerID='. variable_get('shorten_adjix', '') .'&url=';
+    $services['Adjix.com'] = array(
+      'custom' => '_shorten_adjix',
+    );
   }
   if (variable_get('shorten_bitly_login', '') && variable_get('shorten_bitly_key', '')) {
     $services['bit.ly'] = array(
@@ -288,6 +290,27 @@ function shorten_shorten_service() {
 }
 
 /**
+ * Helps get a shortened URL from adjix.
+ */
+function _shorten_adjix($original) {
+  if (variable_get('shorten_adjix_custom', '')) {
+    $url = 'http://api.adjix.com/shrinkLink?ultraShort=y&partnerID='. variable_get('shorten_adjix', '') .'&url=';
+    $adjix = shorten_fetch($url);
+    if ($adjix) {
+      return $adjix;
+    }
+  }
+  else {
+    $url = 'http://api.adjix.com/shrinkLink?tokenOnly=y&partnerID='. variable_get('shorten_adjix', '') .'&url=';
+    $adjix = shorten_fetch($url);
+    if ($adjix) {
+      return variable_get('shorten_adjix_custom', '') . $adjix;
+    }
+  }
+  watchdog('shorten', 'Error fetching shortened URL from adjix.', array(), WATCHDOG_ERROR, $url);
+}
+
+/**
  * Helps get a shortened URL from j.mp.
  */
 function _shorten_jmp($original) {
@@ -298,7 +321,7 @@ function _shorten_jmp($original) {
   if ($bitly) {
     return 'http://j.mp/'. $bitly;
   }
-  drupal_set_message(t('error fetching j.mp code from bit.ly using @url', array('@url' => $url)));
+  watchdog('shorten', 'Error fetching j.mp code from bit.ly.', array(), WATCHDOG_ERROR, $url);
 }
 
 /**

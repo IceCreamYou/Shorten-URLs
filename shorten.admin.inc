@@ -134,10 +134,22 @@ function shorten_admin_submit($form, &$form_state) {
  * Keys page.
  */
 function shorten_keys($form_state) {
-  $form['shorten_adjix'] = array(
+  $form['shorten_adjix_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Adjix'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['shorten_adjix_fieldset']['shorten_adjix'] = array(
     '#type' => 'textfield',
     '#title' => t('Adjix Partner ID'),
     '#default_value' => variable_get('shorten_adjix', ''),
+  );
+  $form['shorten_adjix_fieldset']['shorten_adjix_custom'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Adjix Custom Domain'),
+    '#default_value' => variable_get('shorten_adjix_custom', ''),
+    '#description' => t('Optional. Include the final slash, e.g. http://www.google.com/'),
   );
   $form['shorten_bitly'] = array(
     '#type' => 'fieldset',

@@ -18,6 +18,7 @@ function shorten_uninstall() {
   variable_del('shorten_service');
   variable_del('shorten_bitly_key');
   variable_del('shorten_bitly_login');
+  variable_del('shorten_adjix_custom');
   variable_del('shorten_show_service');
   variable_del('shorten_generate_token');
   variable_del('shorten_service_backup');
