@@ -293,15 +293,15 @@ function shorten_shorten_service() {
  * Helps get a shortened URL from adjix.
  */
 function _shorten_adjix($original) {
-  if (variable_get('shorten_adjix_custom', '')) {
-    $url = 'http://api.adjix.com/shrinkLink?ultraShort=y&partnerID='. variable_get('shorten_adjix', '') .'&url=';
+  if (!variable_get('shorten_adjix_custom', '')) {
+    $url = 'http://api.adjix.com/shrinkLink?ultraShort=y&partnerID='. variable_get('shorten_adjix', '') .'&url='. $original;
     $adjix = shorten_fetch($url);
     if ($adjix) {
       return $adjix;
     }
   }
   else {
-    $url = 'http://api.adjix.com/shrinkLink?tokenOnly=y&partnerID='. variable_get('shorten_adjix', '') .'&url=';
+    $url = 'http://api.adjix.com/shrinkLink?tokenOnly=y&partnerID='. variable_get('shorten_adjix', '') .'&url='. $original;
     $adjix = shorten_fetch($url);
     if ($adjix) {
       return variable_get('shorten_adjix_custom', '') . $adjix;
