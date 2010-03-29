@@ -220,10 +220,6 @@ function _shorten_get_url($original, $api) {
       }
     }
   }
-  //If the service isn't found, use the original.
-  if (!$url) {
-    return $original;
-  }
 
   if ($url && (drupal_substr($url, 0, 7) == 'http://' || drupal_substr($url, 0, 8) == 'https://')) {
     return $url;
