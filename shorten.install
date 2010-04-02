@@ -3,13 +3,31 @@
 
 /**
  * @file
- *   Uninstalls the Shorten module.
+ *   (Un)installs the Shorten module.
  */
+
+/**
+ * Implementation of hook_install().
+ */
+function shorten_install() {
+  drupal_install_schema('shorten');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function shorten_schema(){
+  $schema = array();
+  $schema['cache_shorten'] = drupal_get_schema_unprocessed('system', 'cache');
+  return $schema;
+}
 
 /**
  * Implementation of hook_uninstall().
  */
 function shorten_uninstall() {
+  drupal_uninstall_schema('shorten');
+
   variable_del('shorten_www');
   variable_del('shorten_adjix');
   variable_del('shorten_cligs');
@@ -42,4 +60,14 @@ function shorten_update_6100() {
     'success' => TRUE,
     'query' => $r ? t('Shorten URLs service updated') : t('Caches refreshed'),
   ));
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function shorten_update_6101() {
+  $ret = array();
+  $schema = drupal_get_schema_unprocessed('system', 'cache');
+  db_create_table($ret, 'cache_shorten', $schema);
+  return $ret;
 }

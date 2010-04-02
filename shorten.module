@@ -7,11 +7,6 @@
  */
 
 /**
- * @todo
- * - AHAHify the block form
- */
-
-/**
  * Implementation of hook_help().
  */
 function shorten_help($path, $arg) {
@@ -121,6 +116,13 @@ function shorten_perm() {
 }
 
 /**
+ * Implementation of hook_flush_caches().
+ */
+function shorten_flush_caches() {
+  return array('cache_shorten');
+}
+
+/**
  * Retrieves and beautifies the abbreviated URL.
  * This is the main API function of this module.
  *
@@ -140,7 +142,7 @@ function shorten_url($original = '', $service = '') {
   if (!$service) {
     $service = variable_get('shorten_service', 'is.gd');
   }
-  $cached = cache_get($original);
+  $cached = cache_get($original, 'cache_shorten');
   if ($cached->data) {
     return $cached->data;
   }
@@ -169,7 +171,7 @@ function shorten_url($original = '', $service = '') {
   if ($url == $original) {
     $expire = time() + (60 * 30);
   }
-  cache_set($original, $url, 'cache', $expire);
+  cache_set($original, $url, 'cache_shorten', $expire);
   module_invoke_all('shorten_create', $original, $url, $service);
   return $url;
 }
