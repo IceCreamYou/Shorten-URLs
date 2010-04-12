@@ -91,6 +91,13 @@ function shorten_admin($form_state) {
       '#default_value' => variable_get('shorten_generate_token', 1),
     );
   }
+  $form['shorten_use_alias'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Shorten aliased URLs where possible'),
+    '#description' => t('Where possible, generate shortened URLs based on the aliased version of a URL.')
+      .' <strong>'. t('Some integrated modules ignore this.') .'</strong>',
+    '#default_value' => variable_get('shorten_use_alias', 1),
+  );
   unset($services['none']);
   $form['shorten_invisible_services'] = array(
     '#type' => 'checkboxes',
