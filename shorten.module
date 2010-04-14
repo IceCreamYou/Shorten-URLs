@@ -163,8 +163,18 @@ function shorten_url($original = '', $service = '') {
   }
   //Replace "http://" with "www." if the URL is abbreviated because it's shorter.
   if ($url != $original && variable_get('shorten_www', TRUE)) {
-    $url = drupal_substr($url, 7);
-    $url = 'www.'. $url;
+    if (strpos($url, 'http://') === 0) {
+      $url = drupal_substr($url, 7);
+      if (strpos($url, 'www.') !== 0) {
+        $url = 'www.'. $url;
+      }
+    }
+    elseif (strpos($url, 'https://') === 0) {
+      $url = drupal_substr($url, 8);
+      if (strpos($url, 'www.') !== 0) {
+        $url = 'www.'. $url;
+      }
+    }
   }
   $expire = time() + (60 * 60 * 24 * 7 * 3);
   //Only cache failed retrievals for 30 minutes.
@@ -223,8 +233,10 @@ function _shorten_get_url($original, $api) {
     }
   }
 
-  if ($url && (drupal_substr($url, 0, 7) == 'http://' || drupal_substr($url, 0, 8) == 'https://')) {
-    return $url;
+  if ($url) {
+    if (drupal_substr($url, 0, 7) == 'http://' || drupal_substr($url, 0, 8) == 'https://') {
+      return $url;
+    }
   }
   watchdog('shorten', '%method failed to return an abbreviated URL from %service.', array('%method' => $method, '%service' => $service), WATCHDOG_NOTICE, $url);
   return FALSE;
