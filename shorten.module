@@ -371,6 +371,11 @@ function shorten_fetch($url, $tag = '', $special = '') {
   else {
     $contents = $url;
   }
+  //If for some reason retrieving the shortened URL fails very early, it can return FALSE.
+  //In that case, just return the original, since we always want to return a URL if possible.
+  if (!$contents) {
+    return $url;
+  }
   if ($tag) {
     if (!$special) {
       $contents = _shorten_xml($contents, $tag);
