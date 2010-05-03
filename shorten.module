@@ -253,14 +253,16 @@ function shorten_shorten_service() {
     );
   }
   if (variable_get('shorten_bitly_login', '') && variable_get('shorten_bitly_key', '')) {
-    $services['bit.ly'] = array(
-      'custom' => 'xml',
-      'url' => 'http://api.bit.ly/shorten?version=2.0.1&format=xml&history=1&login='. variable_get('shorten_bitly_login', '') .'&apiKey='. variable_get('shorten_bitly_key', '') .'&longUrl=',
-      'tag' => 'shortUrl',
-    );
-    $services['j.mp'] = array(
-      'custom' => '_shorten_jmp',
-    );
+    $services['bit.ly'] = 'http://api.bit.ly/v3/shorten?format=txt&login='.
+      variable_get('shorten_bitly_login', '') .'&apiKey='.
+      variable_get('shorten_bitly_key', '') .'&x_login='.
+      variable_get('shorten_bitly_login', '') .'&x_apiKey='.
+      variable_get('shorten_bitly_key', '') .'&longUrl=';
+    $services['j.mp'] = 'http://api.bit.ly/v3/shorten?format=txt&domain=j.mp&login='.
+      variable_get('shorten_bitly_login', '') .'&apiKey='.
+      variable_get('shorten_bitly_key', '') .'&x_login='.
+      variable_get('shorten_bitly_login', '') .'&x_apiKey='.
+      variable_get('shorten_bitly_key', '') .'&longUrl=';
   }
   $services += array(
     'cli.gs' => 'http://cli.gs/api/v1/cligs/create?appid=drupal&url=',
@@ -318,20 +320,6 @@ function _shorten_adjix($original) {
     }
   }
   watchdog('shorten', 'Error fetching shortened URL from adjix.', array(), WATCHDOG_ERROR, $url);
-}
-
-/**
- * Helps get a shortened URL from j.mp.
- */
-function _shorten_jmp($original) {
-  $url = 'http://api.bit.ly/shorten?version=2.0.1&format=xml&history=1&login='.
-    variable_get('shorten_bitly_login', '') .'&apiKey='.
-    variable_get('shorten_bitly_key', '') .'&longUrl='. $original;
-  $bitly = shorten_fetch($url, 'userHash');
-  if ($bitly) {
-    return 'http://j.mp/'. $bitly;
-  }
-  watchdog('shorten', 'Error fetching j.mp code from bit.ly.', array(), WATCHDOG_ERROR, $url);
 }
 
 /**
