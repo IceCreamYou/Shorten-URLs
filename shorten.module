@@ -320,6 +320,7 @@ function _shorten_adjix($original) {
     }
   }
   watchdog('shorten', 'Error fetching shortened URL from adjix.', array(), WATCHDOG_ERROR, $url);
+  return FALSE;
 }
 
 /**
@@ -340,7 +341,7 @@ function _shorten_shorturl($original) {
  * @param $special
  *   A special format the service will return. Currently only supports 'json.'
  * @return
- *   An abbreviated URL or the original one if fetching methods are unavailable.
+ *   An abbreviated URL or FALSE if fetching the abbreviated URL fails.
  */
 function shorten_fetch($url, $tag = '', $special = '') {
   //drupal_http_request() does not offer a reliable way to time out.
@@ -357,12 +358,10 @@ function shorten_fetch($url, $tag = '', $special = '') {
     curl_close($c);
   }
   else {
-    $contents = $url;
+    return FALSE;
   }
-  //If for some reason retrieving the shortened URL fails very early, it can return FALSE.
-  //In that case, just return the original, since we always want to return a URL if possible.
   if (!$contents) {
-    return $url;
+    return FALSE;
   }
   if ($tag) {
     if (!$special) {
@@ -372,6 +371,9 @@ function shorten_fetch($url, $tag = '', $special = '') {
       $contents = json_decode($contents, TRUE);
       $contents = $contents[$tag];
     }
+  }
+  if (!$contents || $contents == $url) {
+    return FALSE;
   }
   return $contents;
 }
