@@ -161,6 +161,7 @@ function shorten_url($original = '', $service = '') {
       $url = $original;
     }
   }
+  $url = trim($url); //Redundant for most services.
   //Replace "http://" with "www." if the URL is abbreviated because it's shorter.
   if ($url != $original && variable_get('shorten_www', TRUE)) {
     if (strpos($url, 'http://') === 0) {
