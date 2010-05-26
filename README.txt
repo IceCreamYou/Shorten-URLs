@@ -33,45 +33,7 @@ service in both instances.
 API
 ===
 
-shorten_url($original = '', $service = '')
-  Returns a shortened URL. $original is the URL to be shortened, and $service is
-the service to use to shorten the URL. For service, you can use any string that
-appears in the default service options on the settings page. If $original is not
-specified it defaults to the current page; if $service is not specified it
-defaults to the primary service set in the settings for this module. Shortened
-URLs are cached for performance.
-
-hook_shorten_service($original)
-  $original is the URL to be shortened. This hook should return an array keyed
-by the name of the service, with values as one of the options below:
-
-<?php
-  return array(
-    //Automatically gets the shortened URL based on the URL to TinyURL's API
-    //provided below.
-    'TinyURL' => 'http://tinyurl.com/api-create.php?url=',
-    //This is equivalent to the above.
-    'TinyURL' => array(
-      'custom' => FALSE,
-      'url' => 'http://tinyurl.com/api-create.php?url=',
-    ),
-
-    //Does custom processing within the hook and passes an already-shortened URL.
-    //Use this for services requiring $_POST or JSON.
-    'myservice' => array(
-      'custom' => TRUE,
-      'url' => mymodule_get_short_myservice_url($original),
-    ),
-
-    //Automatically gets the shortened URL from the value of the 'tag' element
-    //when the relevant service provides the response as XML.
-    'short.ie' => array(
-      'custom' => 'xml',
-      'url' => 'http://short.ie/api?url=',
-      'tag' => 'shortened',
-    ),
-  );
-?>
+Up-to-date API documentation is maintained at http://drupal.org/node/805174.
 
 =====
 NOTES
