@@ -328,7 +328,7 @@ function _shorten_adjix($original) {
  * Helps get a shortened URL via the Short URLs module.
  */
 function _shorten_shorturl($original) {
-  return url(shorturl_shorten($original), array('absolute' => TRUE));
+  return shorturl_shorten($original, TRUE);
 }
 
 /**
