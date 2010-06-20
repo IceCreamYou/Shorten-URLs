@@ -72,3 +72,23 @@ function shorten_update_6101() {
   db_create_table($ret, 'cache_shorten', $schema);
   return $ret;
 }
+
+/**
+ * Implementation of hook_update_N().
+ */
+function shorten_update_6102() {
+  $disabled_services = variable_get('shorten_invisible_services', array());
+  if (isset($disabled_services['This site'])) {
+    $value = $disabled_services['This site'] ? 'Drupal ShortURL module' : 0;
+    $disabled_services['Drupal ShortURL module'] = $value;
+    unset($disabled_services['This site']);
+    variable_set('shorten_invisible_services', $disabled_services);
+  }
+  if (variable_get('shorten_service', 'is.gd') == 'This site') {
+    variable_set('shorten_service', 'Drupal ShortURL module');
+  }
+  if (variable_get('shorten_service_backup', 'TinyURL') == 'This site') {
+    variable_set('shorten_service_backup', 'Drupal ShortURL module');
+  }
+  return array();
+}

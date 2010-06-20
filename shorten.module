@@ -137,7 +137,7 @@ function shorten_flush_caches() {
  */
 function shorten_url($original = '', $service = '') {
   if (!$original) {
-    $original = url($_GET['q'], array('absolute' => TRUE, 'alias' => variable_get('shorten_use_alias', 1)));
+    $original = url($_GET['q'], array('absolute' => TRUE, 'alias' => !variable_get('shorten_use_alias', 1)));
   }
   if (!$service) {
     $service = variable_get('shorten_service', 'is.gd');
@@ -287,7 +287,7 @@ function shorten_shorten_service() {
     'urlShort' => 'http://u.mavrev.com/api.php?url=',
   );
   if (module_exists('shorturl')) {
-    $services['This site'] = array(
+    $services['Drupal ShortURL module'] = array(
       'custom' => '_shorten_shorturl',
     );
   }
@@ -576,7 +576,7 @@ function shorten_current(&$form_state) {
   $form['this_shortened'] = array(
     '#type' => 'textfield',
     '#size' => 25,
-    '#default_value' => shorten_url(url($_GET['q'], array('absolute' => TRUE, 'alias' => variable_get('shorten_use_alias', 1)))),
+    '#default_value' => shorten_url(),
   );
   return $form;
 }
