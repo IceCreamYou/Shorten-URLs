@@ -37,7 +37,14 @@ function record_shorten_theme($existing, $type, $theme, $path) {
  * Implementation of hook_shorten_create().
  */
 function record_shorten_shorten_create($old, $new, $service) {
-  $array = array('original' => $old, 'short' => $new, 'service' => $service);
+  $array = array(
+    'original' => $old,
+    'short' => $new,
+    'service' => $service,
+    'uid' => $GLOBALS['user']->uid,
+    'hostname' => ip_address(),
+    'created' => time(),
+  );
   drupal_write_record('record_shorten', $array);
 }
 
@@ -45,7 +52,9 @@ function record_shorten_shorten_create($old, $new, $service) {
  * Builds a list of shortened URLs.
  */
 function theme_record_shorten_records() {
-  $output = record_shorten_records_table();
+  $total = db_result(db_query("SELECT COUNT(sid) FROM {record_shorten}"));
+  $output = '<p>'. format_plural($total, '1 shortened URL has been recorded.', '@count shortened URLs have been recorded.');
+  $output .= record_shorten_records_table();
   $output .= '<br />';
   $output .= drupal_get_form('record_shorten_clear_all');
   return $output;

@@ -28,9 +28,12 @@ function shorten_schema(){
 function shorten_uninstall() {
   drupal_uninstall_schema('shorten');
 
+  variable_del('shorten_ez');
   variable_del('shorten_www');
   variable_del('shorten_adjix');
   variable_del('shorten_cligs');
+  variable_del('shorten_budurl');
+  variable_del('shorten_fwd4me');
   variable_del('shorten_method');
   variable_del('shorten_redirec');
   variable_del('shorten_service');

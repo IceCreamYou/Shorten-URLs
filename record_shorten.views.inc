@@ -20,12 +20,19 @@ function record_shorten_views_data() {
     'help' => t('Listings of URLs shortened by the Shorten URLs module.'),
     'weight' => 10,
   );
+  $data['users']['table']['join'] = array(
+    'record_shorten' => array(
+      'left_field' => 'uid',
+      'field' => 'uid',
+      'type' => 'LEFT',
+    ),
+  );
 
   $data['record_shorten']['sid'] = array(
     'title' => t('Shorten ID'),
     'help' => t('The ID of the recorded URL.'),
     'field' => array(
-      'handler' => 'views_handler_field_numeric',
+      'handler' => 'views_handler_field',
       'click sortable' => TRUE,
     ),
     'filter' => array(
@@ -93,6 +100,51 @@ function record_shorten_views_data() {
     ),
   );
 
+  $data['record_shorten']['uid'] = array(
+    'title' => t('User ID'),
+    'help' => t('The User ID of the user who created the shortened URL.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+  );
+
+  $data['record_shorten']['hostname'] = array(
+    'title' => t('IP Address'),
+    'help' => t('The IP address of the user who created the shortened URL.'),
+    'field' => array(
+      'handler' => 'record_shorten_views_handler_field_hostname',
+      'click sortable' => FALSE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+  $data['record_shorten']['created'] = array(
+    'title' => t('Created time'),
+    'help' => t('The time the shortened URL was created.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
   return $data;
 }
 
@@ -107,6 +159,9 @@ function record_shorten_views_handlers() {
     'handlers' => array(
       'record_shorten_views_handler_filter_string_service' => array(
         'parent' => 'views_handler_filter_many_to_one',
+      ),
+      'record_shorten_views_handler_field_hostname' => array(
+        'parent' => 'views_handler_field',
       ),
     ),
   );
