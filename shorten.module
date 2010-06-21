@@ -412,10 +412,8 @@ function shorten_form_shorten() {
   $form['opendiv'] = array(
     '#value' => '<div id="shorten_replace">',
   );
+  drupal_add_js(drupal_get_path('module', 'shorten') .'/shorten.js');
   if ($_SESSION['shorten']) {
-    if (arg(0) != 'shorten' && arg(1) != 'js') {
-      drupal_add_js(drupal_get_path('module', 'shorten') .'/shorten.js');
-    }
     $form['shortened_url'] = array(
       '#type' => 'textfield',
       '#title' => t('Shortened URL'),
