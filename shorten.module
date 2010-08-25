@@ -304,6 +304,11 @@ function shorten_shorten_service() {
   if (variable_get('shorten_redirec', '')) {
     $services['redir.ec'] = 'http://redir.ec/_api/rest/redirec/create?appid=drupal&apikey='. variable_get('shorten_redirec', '') .'&url=';
   }
+  if (module_exists('shurly')) {
+    $services['ShURLy'] = array(
+      'custom' => '_shorten_shurly',
+    );
+  }
   //Alphabetize. ksort() is case-sensitive.
   uksort($services, 'strcasecmp');
   return $services;
@@ -336,6 +341,14 @@ function _shorten_adjix($original) {
  */
 function _shorten_shorturl($original) {
   return shorturl_shorten($original, TRUE);
+}
+
+/**
+ * Helps get a shortened URL via the ShURLy module.
+ */
+function _shorten_shurly($original) {
+  $result = shurly_shorten($original);
+  return $result['short_url'];
 }
 
 /**
