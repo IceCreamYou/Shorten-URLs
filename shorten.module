@@ -348,7 +348,7 @@ function _shorten_shorturl($original) {
  */
 function _shorten_shurly($original) {
   $result = shurly_shorten($original);
-  return $result['short_url'];
+  return $result['shortUrl'];
 }
 
 /**
