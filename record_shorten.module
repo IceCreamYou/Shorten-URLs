@@ -16,7 +16,7 @@ function record_shorten_menu() {
     'description' => 'Lists shortened URLs.',
     'page callback' => 'theme',
     'page arguments' => array('record_shorten_records'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
     'type' => MENU_LOCAL_TASK,
   );
   return $items;

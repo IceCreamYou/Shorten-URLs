@@ -29,13 +29,13 @@ function shorten_menu() {
     'description' => 'Adjust certain display settings for Shorten.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('shorten_admin'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
     'file' => 'shorten.admin.inc',
   );
   $items['admin/settings/shorten/general'] = array(
     'title' => 'General',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer site configuration'),
     'weight' => -1,
   );
   $items['admin/settings/shorten/keys'] = array(
