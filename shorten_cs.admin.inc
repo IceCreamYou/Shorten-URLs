@@ -123,8 +123,15 @@ function shorten_cs_edit($form_state, $service) {
  * Validates the form to edit a custom service.
  */
  function shorten_cs_edit_validate($form, $form_state) {
-   shorten_cs_add_form_validate($form, $form_state);
- }
+  $v = $form_state['values'];
+  if (($v['type'] == 'xml' || $v['type'] == 'json') && empty($v['tag'])) {
+    form_set_error('type', t('An XML tag or JSON key is required for services with a response type of XML or JSON.'));
+  }
+  $exists = db_result(db_query("SELECT COUNT(sid) FROM {shorten_cs} WHERE name = '%s' AND sid <> %d", $v['name'], $v['sid']));
+  if ($exists > 0) {
+    form_set_error('name', t('A service with that name already exists.'));
+  }
+}
  
  /**
   * Submits the form to edit a service.
