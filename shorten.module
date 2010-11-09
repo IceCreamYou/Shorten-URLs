@@ -129,7 +129,7 @@ function shorten_url($original = '', $service = '') {
     $service = variable_get('shorten_service', 'is.gd');
   }
   $cached = cache_get($original, 'cache_shorten');
-  if ($cached->data) {
+  if (!empty($cached->data)) {
     return $cached->data;
   }
   $services = module_invoke_all('shorten_service');
