@@ -433,7 +433,7 @@ function shorten_form_shorten() {
     '#value' => '<div id="shorten_replace">',
   );
   drupal_add_js(drupal_get_path('module', 'shorten') .'/shorten.js');
-  if ($_SESSION['shorten']) {
+  if (isset($_SESSION['shorten']) && $_SESSION['shorten']) {
     $form['shortened_url'] = array(
       '#type' => 'textfield',
       '#title' => t('Shortened URL'),
@@ -556,7 +556,7 @@ function _shorten_service_form() {
       $default = 'TinyURL';
     }
     //Remember the last service that was used.
-    if ($_SESSION['shorten_service']) {
+    if (isset($_SESSION['shorten_service']) && $_SESSION['shorten_service']) {
       $default = $_SESSION['shorten_service'];
     }
     $count = count($services);
