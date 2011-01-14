@@ -3,11 +3,11 @@
 
 /**
  * @file
- *   Install, update, and uninstall functions for the Shorten URLs Custom Services module.
+ *   (Un)installs the Shorten URLs Custom Services module.
  */
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function shorten_cs_schema() {
   $schema = array();
@@ -56,18 +56,4 @@ function shorten_cs_schema() {
     'primary key' => array('sid'),
   );
   return $schema;
-}
-
-/**
- * Implementation of hook_install().
- */
-function shorten_cs_install() {
-  drupal_install_schema('shorten_cs');
-}
-
-/**
- * Implementation of hook_uninstall().
- */
-function shorten_cs_uninstall() {
-  drupal_uninstall_schema('shorten_cs');
 }

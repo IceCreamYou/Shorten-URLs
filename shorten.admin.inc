@@ -7,9 +7,16 @@
  */
 
 /**
+ * Returns HTML representing the shorten admin form.
+ */
+function shorten_admin_form() {
+  return drupal_render(drupal_get_form('shorten_admin'));
+}
+
+/**
  * Settings page.
  */
-function shorten_admin($form_state) {
+function shorten_admin($form, $form_state) {
   $form['shorten_www'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use "www." instead of "http://"'),
@@ -30,9 +37,9 @@ function shorten_admin($form_state) {
     $form['shorten_method'] = array(
       '#type' => 'radios',
       '#title' => t('Method'),
-      '#description' => '<p>'. t('The method to use to retrieve the abbreviated URL.') .'</p>'.
-        '<p><strong>'. t('Your PHP installation does not support the URL abbreviation feature of the Shorten module.') .'</strong> '.
-        t('You must compile PHP with either the cURL library or the file_get_contents() function to use this option.') .'</p>',
+      '#description' => '<p>' . t('The method to use to retrieve the abbreviated URL.') . '</p>' .
+        '<p><strong>' . t('Your PHP installation does not support the URL abbreviation feature of the Shorten module.') . '</strong> ' .
+        t('You must compile PHP with either the cURL library or the file_get_contents() function to use this option.') . '</p>',
       '#default_value' => 'none',
       '#options' => array('none' => t('None')),
       '#disabled' => TRUE,
@@ -91,9 +98,9 @@ function shorten_admin($form_state) {
     $form['shorten_generate_token'] = array(
       '#type' => 'checkbox',
       '#title' => t('Generate a shortened URL for nodes for use as tokens'),
-      '#description' => t('This option could create a lot of little-used short URLs. '.
-        'However, performance load is minimized because the shortened URLs are cached. '.
-        'Note that if you turn this off, you should not use the [node:url] token.'),
+      '#description' => t('This option could create a lot of little-used short URLs.') . ' ' .
+        t('However, performance load is minimized because the shortened URLs are cached.') . ' ' .
+        t('Note that if you turn this off, you should not use the [node:url] token.'),
       '#default_value' => variable_get('shorten_generate_token', 1),
     );
   }
@@ -101,16 +108,16 @@ function shorten_admin($form_state) {
     '#type' => 'checkbox',
     '#title' => t('Shorten aliased URLs where possible'),
     '#description' => t('Where possible, generate shortened URLs based on the aliased version of a URL.')
-      .' <strong>'. t('Some integrated modules ignore this.') .'</strong>',
+      . ' <strong>' . t('Some integrated modules ignore this.') . '</strong>',
     '#default_value' => variable_get('shorten_use_alias', 1),
   );
   $form['shorten_cache_duration'] = array(
     '#type' => 'textfield',
-    '#field_prefix' => t('Cache shortened URLs for') .' ',
-    '#field_suffix' => ' '. t('seconds'),
-    '#description' => t('Shortened URLs are stored after retrieval to improve performance.') .' '.
-      t('Enter the number of seconds for which you would like the shortened URLs to be stored.') .' '.
-      t('Leave this field blank to store shortened URLs indefinitely (although this is not recommended).') .' '.
+    '#field_prefix' => t('Cache shortened URLs for') . ' ',
+    '#field_suffix' => ' ' . t('seconds'),
+    '#description' => t('Shortened URLs are stored after retrieval to improve performance.') . ' ' .
+      t('Enter the number of seconds for which you would like the shortened URLs to be stored.') . ' ' .
+      t('Leave this field blank to store shortened URLs indefinitely (although this is not recommended).') . ' ' .
       t('The default value is 1814400 (3 weeks).'),
     '#size' => 11,
     '#default_value' => variable_get('shorten_cache_duration', 1814400),
@@ -119,8 +126,8 @@ function shorten_admin($form_state) {
   $form['shorten_invisible_services'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Disallowed services'),
-    '#description' => t('Checking the box next to a service will make it <strong>unavailable</strong> for use in the Shorten URLs block and page. '.
-      'If you disallow all services, the primary service will be used.'),
+    '#description' => t('Checking the box next to a service will make it <strong>unavailable</strong> for use in the Shorten URLs block and page.') . ' ' .
+      t('If you disallow all services, the primary service will be used.'),
     '#default_value' => variable_get('shorten_invisible_services', array()),
     '#options' => $services,
   );
@@ -137,11 +144,11 @@ function shorten_admin_validate($form, &$form_state) {
   }
   elseif (($v['shorten_service'] == 'bit.ly' && $v['shorten_service_backup'] == 'j.mp') ||
     ($v['shorten_service'] == 'j.mp' && $v['shorten_service_backup'] == 'bit.ly')) {
-    form_set_error('shorten_service_backup', t('j.mp and bit.ly are the same service.') .' '.
+    form_set_error('shorten_service_backup', t('j.mp and bit.ly are the same service.') . ' ' .
       t('You must select a backup abbreviation service that is different than your primary service.'));
   }
   if ($v['shorten_service'] == 'none' && $v['shorten_service_backup'] != 'none') {
-    drupal_set_message(t('You have selected a backup URL abbreviation service, but no primary service.') .' '.
+    drupal_set_message(t('You have selected a backup URL abbreviation service, but no primary service.') . ' ' .
       t('Your URLs will not be abbreviated with these settings.'));
   }
   if ($v['shorten_cache_duration'] !== '' && (
@@ -162,9 +169,16 @@ function shorten_admin_submit($form, &$form_state) {
 }
 
 /**
+ * Returns HTML representing the shorten keys admin form.
+ */
+function shorten_keys_form() {
+  return drupal_render(drupal_get_form('shorten_cs_delete'));
+}
+
+/**
  * Keys page.
  */
-function shorten_keys($form_state) {
+function shorten_keys($form, $form_state) {
   $form['shorten_adjix_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Adjix'),

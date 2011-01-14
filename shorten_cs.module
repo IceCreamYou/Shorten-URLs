@@ -7,11 +7,11 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function shorten_cs_menu() {
   $items = array();
-  $items['admin/settings/shorten/custom'] = array(
+  $items['admin/config/shorten/custom'] = array(
     'title' => 'Custom services',
     'description' => 'Specify information about any service to expose it to Shorten URLs.',
     'page callback' => 'theme',
@@ -19,18 +19,18 @@ function shorten_cs_menu() {
     'access arguments' => array('administer Shorten URLs custom services'),
     'type' => MENU_LOCAL_TASK,
   );
-  $items['admin/settings/shorten/custom/edit/%shorten_cs'] = array(
+  $items['admin/config/shorten/custom/edit/%shorten_cs'] = array(
     'title' => 'Edit custom service',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('shorten_cs_edit', 5),
+    'page callback' => 'shorten_cs_edit_form',
+    'page arguments' => array(5),
     'access arguments' => array('administer Shorten URLs custom services'),
     'type' => MENU_CALLBACK,
     'file' => 'shorten_cs.admin.inc',
   );
-  $items['admin/settings/shorten/custom/delete/%shorten_cs'] = array(
+  $items['admin/config/shorten/custom/delete/%shorten_cs'] = array(
     'title' => 'Custom services',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('shorten_cs_delete', 5),
+    'page callback' => 'shorten_cs_delete_form',
+    'page arguments' => array(5),
     'access arguments' => array('administer Shorten URLs custom services'),
     'type' => MENU_CALLBACK,
     'file' => 'shorten_cs.admin.inc',
@@ -39,12 +39,12 @@ function shorten_cs_menu() {
 }
 
 /**
- * Implementation of hook_shorten_service().
+ * Implements hook_shorten_service().
  */
 function shorten_cs_shorten_service() {
-  $result = db_query("SELECT * FROM {shorten_cs}");
+  $result = db_query("SELECT * FROM {shorten_cs}")->fetchAll();
   $services = array();
-  while ($service = db_fetch_object($result)) {
+  foreach ($result as $service) {
     $services[$service->name] = array(
       'custom' => $service->type == 'text' ? FALSE : $service->type,
       'url' => $service->url,
@@ -60,7 +60,7 @@ function shorten_cs_shorten_service() {
 }
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function shorten_cs_theme($existing, $type, $theme, $path) {
   return array(
@@ -72,15 +72,21 @@ function shorten_cs_theme($existing, $type, $theme, $path) {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implements hook_perm().
  */
-function shorten_cs_perm() {
-  return array('administer Shorten URLs custom services');
+function shorten_cs_permission() {
+  return array(
+    'administer Shorten URLs custom services' => array(
+      'title' => t('Administer custom services'),
+      'description' => t('Add and remove custom URL shortening services.'),
+    ),
+  );
 }
 
 /**
- * Implementation of hook_load().
+ * Loads a custom service object.
  */
 function shorten_cs_load($sid) {
-  return db_fetch_object(db_query("SELECT * FROM {shorten_cs} WHERE sid = %d", $sid));
+  return db_query("SELECT * FROM {shorten_cs} WHERE sid = :sid", array(':sid' => $sid))
+    ->fetchObject();
 }

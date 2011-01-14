@@ -1,5 +1,13 @@
 ; $Id$
 name = Record Shorten
 description = "Records shortened URLs from the Shorten module."
-core = 6.x
+core = 7.x
+configure = admin/config/shorten/records
 dependencies[] = shorten
+
+files[] = record_shorten.install
+files[] = record_shorten.module
+files[] = record_shorten.views.inc
+files[] = record_shorten.views_default.inc
+files[] = record_shorten_views_handler_field_hostname.inc
+files[] = record_shorten_views_handler_filter_string_service.inc

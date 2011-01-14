@@ -1,5 +1,10 @@
 ; $Id$
 name = Shorten URLs Custom Services
 description = "Allows administrators to specify custom URL shortening services. <strong>Advanced users only.</strong>"
-core = 6.x
+core = 7.x
+configure = admin/config/shorten/custom
 dependencies[] = shorten
+
+files[] = shorten_cs.admin.inc
+files[] = shorten_cs.install
+files[] = shorten_cs.module

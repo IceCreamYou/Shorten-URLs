@@ -7,11 +7,11 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function record_shorten_menu() {
   $items = array();
-  $items['admin/settings/shorten/records'] = array(
+  $items['admin/config/shorten/records'] = array(
     'title' => 'Shortened URLs',
     'description' => 'Lists shortened URLs.',
     'page callback' => 'theme',
@@ -23,18 +23,18 @@ function record_shorten_menu() {
 }
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function record_shorten_theme($existing, $type, $theme, $path) {
   return array(
     'record_shorten_records' => array(
-      'arguments' => array(),
+      'variables' => array(),
     ),
   );
 }
 
 /**
- * Implementation of hook_shorten_create().
+ * Implements hook_shorten_create().
  */
 function record_shorten_shorten_create($old, $new, $service) {
   $array = array(
@@ -43,7 +43,7 @@ function record_shorten_shorten_create($old, $new, $service) {
     'service' => $service,
     'uid' => $GLOBALS['user']->uid,
     'hostname' => ip_address(),
-    'created' => time(),
+    'created' => REQUEST_TIME,
   );
   drupal_write_record('record_shorten', $array);
 }
@@ -52,25 +52,24 @@ function record_shorten_shorten_create($old, $new, $service) {
  * Builds a list of shortened URLs.
  */
 function theme_record_shorten_records() {
-  $total = db_result(db_query("SELECT COUNT(sid) FROM {record_shorten}"));
-  $output = '<p>'. format_plural($total, '1 shortened URL has been recorded.', '@count shortened URLs have been recorded.');
+  $total = db_query("SELECT COUNT(sid) FROM {record_shorten}")->fetchField();
+  $output = '<p>' . format_plural($total, '1 shortened URL has been recorded.', '@count shortened URLs have been recorded.');
   $output .= record_shorten_records_table();
   $output .= '<br />';
-  $output .= drupal_get_form('record_shorten_clear_all');
+  $output .= drupal_render(drupal_get_form('record_shorten_clear_all'));
   return $output;
 }
 
 /**
  * Clear all records form.
  */
-function record_shorten_clear_all(&$form_state) {
-  $form = array();
+function record_shorten_clear_all($form, $form_state) {
   $form['warning'] = array(
-    '#value' => '<p><strong>'. t('Warning: there is no confirmation page. Cleared records are permanently deleted.') .'</strong></p>',
+    '#value' => '<p><strong>' . t('Warning: there is no confirmation page. Cleared records are permanently deleted.') . '</strong></p>',
   );
   $form['note'] = array(
-    '#value' => '<p>'. t('Note: clearing records does not clear the Shorten URLs cache.') .' '.
-      t('Also, URLs already in the cache are not recorded again.') .'</p>',
+    '#value' => '<p>' . t('Note: clearing records does not clear the Shorten URLs cache.') . ' ' .
+      t('Also, URLs already in the cache are not recorded again.') . '</p>',
   );
   $form['clear'] = array(
     '#type' => 'submit',
@@ -95,18 +94,26 @@ function record_shorten_records_table() {
   }
   $header = array(t('Original'), t('Short'), t('Service'));
   $rows = array();
-  $result = pager_query("SELECT original, short, service FROM {record_shorten} ORDER BY sid DESC");
-  while ($row = db_fetch_array($result)) {
-    $rows[] = $row;
+  // SELECT original, short, service FROM {record_shorten} ORDER BY sid DESC
+  $result = db_select('record_shorten', 'rs')
+    ->extend('PagerDefault')
+    ->limit(10)
+    ->fields('rs', array('original', 'short', 'service'))
+    ->orderBy('rs.sid', 'DESC')
+    ->execute();
+  foreach ($result as $row) {
+    // Sigh... DBTNG doesn't have a ->fetchAsNonAssocArray()
+    $rows[] = array($row->original, $row->short, $row->service);
   }
-  $output = theme('table', $header, $rows);
-  $output .= theme('pager');
+  $output = theme('table', array('header' => $header, 'rows' => $rows));
+  // Oddly, theme_pager($vars) has no defaults for $vars.
+  $output .= theme('pager', array('tags' => array(), 'element' => 0, 'parameters' => array(), 'quantity' => 9));
   return $output;
 }
 
 /**
- * Implementation of hook_views_api().
+ * Implements hook_views_api().
  */
 function record_shorten_views_api() {
-  return array('api' => 2);
+  return array('api' => 3);
 }

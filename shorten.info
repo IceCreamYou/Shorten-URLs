@@ -1,4 +1,9 @@
 ; $Id$
-name = Shorten
+name = Shorten URLs
 description = "Allows easy URL shortening via external services."
-core = 6.x
+core = 7.x
+configure = admin/config/shorten
+
+files[] = shorten.admin.inc
+files[] = shorten.install
+files[] = shorten.module

@@ -3,17 +3,17 @@
 
 /**
  * @file
- * Provide views data and handlers for the Record Shortened URLs module.
+ *   Provide views data and handlers for the Record Shortened URLs module.
  */
 
 /**
- * Implementation of hook_views_data().
+ * Implements hook_views_data().
  */
 function record_shorten_views_data() {
-  //Basic table information.
+  // Basic table information.
   $data['record_shorten']['table']['group']  = t('Shortened URLs');
 
-  //Advertise this table as a possible base table.
+  // Advertise this table as a possible base table.
   $data['record_shorten']['table']['base'] = array(
     'field' => 'sid',
     'title' => t('Shortened URLs'),
@@ -149,7 +149,7 @@ function record_shorten_views_data() {
 }
 
 /**
- * Implementation of hook_views_handlers().
+ * Implements hook_views_handlers().
  */
 function record_shorten_views_handlers() {
   return array(
