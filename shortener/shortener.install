@@ -1,0 +1,15 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   (Un)installs the Shorten URLs Input Filter module.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function shortener_uninstall() {
+  //Remove format settings.
+  db_query("DELETE FROM {variable} WHERE name LIKE 'shortener_url_behavior_%%' OR name LIKE 'shortener_url_length_%%'");
+}
