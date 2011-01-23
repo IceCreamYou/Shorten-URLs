@@ -1,5 +1,8 @@
 ; $Id$
 name = Shorten URLs Input Filter
 description = "Provides an input filter that replaces URLs with a shortened version."
-core = 6.x
+core = 7.x
 dependencies[] = shorten
+
+files[] = shortener.install
+files[] = shortener.module
