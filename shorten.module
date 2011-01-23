@@ -283,6 +283,7 @@ function shorten_shorten_service() {
     'retwt.me' => array('custom' => 'xml', 'url' => 'http://api.retwt.me/shorten.xml?longUrl=', 'tag' => 'shortUrl'),
     'ri.ms' => 'http://ri.ms/api-create.php?url=',
     'short.ie' => 'http://short.ie/api?format=plain&url=',
+    'surl.me' => 'http://surl.me/api-create.php?url=',
     'th8.us' => 'http://th8.us/api.php?url=',
     'TinyURL' => 'http://tinyurl.com/api-create.php?url=',
     'tr.im' => 'http://api.tr.im/api/trim_simple?url=',
