@@ -1,0 +1,145 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Provides an input filter that replaces URLs with a shortened version.
+ */
+
+/**
+ * Implementation of hook_init().
+ */
+function shortener_init() {
+  //Although this is wasteful on pages that don't need it, it is generally more
+  //efficient than disabling caching for input formats using this filter.
+  $path = drupal_get_path('module', 'shortener');
+  drupal_add_css($path .'/shortener.css');
+  drupal_add_js($path .'/shortener.js');
+}
+
+/**
+ * Implementation of hook_filter().
+ */
+function shortener_filter($op, $delta = 0, $format = -1, $text = '') {
+  switch ($op) {
+    case 'list':
+      return array(0 => t('URL shortener'));
+    case 'description':
+      switch ($delta) {
+        case 0:
+          return t('Replaces URLs with a shortened version.');
+        default:
+          return;
+      }
+    case 'process':
+      switch ($delta) {
+        case 0:
+          return _shortener_filter_url($text, $format);
+        default:
+          return $text;
+      }
+    case 'settings':
+      switch ($delta) {
+        case 0:
+          return _shortener_url_settings($format);
+        default:
+          return;
+      }
+    default:
+      return $text;
+  }
+}
+
+/**
+ * Replaces URLs with the shortened version.
+ *
+ * Unlike the core URL filter, this only matches HTTP and HTTPS addresses,
+ * because those are the only ones accepted by most URL shortening services.
+ */
+function _shortener_filter_url($text, $format) {
+  // Pass length to regexp callback.
+  _filter_url_trim(NULL, variable_get('shortener_url_length_'. $format, 72));
+  // Pass behavior to regexp callback.
+  _shortener_url_behavior(NULL, FALSE, variable_get('shortener_url_behavior_'. $format, 'short'), variable_get('shortener_url_length_'. $format, 72));
+
+  $text = ' '. $text .' ';
+
+  // Match absolute URLs.
+  $text = preg_replace_callback("`(<p>|<li>|<br\s*/?>|[ \n\r\t\(])((http://|https://)([a-zA-Z0-9@:%_+*~#?&=.,/;-]*[a-zA-Z0-9@:%_+*~#&=/;-]))([.,?!]*?)(?=(</p>|</li>|<br\s*/?>|[ \n\r\t\)]))`i", '_shortener_url_behavior', $text);
+
+  // Match www domains/addresses.
+  $text = preg_replace_callback("`(<p>|<li>|[ \n\r\t\(])(www\.[a-zA-Z0-9@:%_+*~#?&=.,/;-]*[a-zA-Z0-9@:%_+~#\&=/;-])([.,?!]*?)(?=(</p>|</li>|<br\s*/?>|[ \n\r\t\)]))`i", '_shortener_url_parse_partial_links', $text);
+  $text = substr($text, 1, -1);
+
+  return $text;
+}
+
+/**
+ * Processes matches on partial URLs and returns the "fixed" version.
+ */
+function _shortener_url_parse_partial_links($match) {
+  return _shortener_url_behavior($match, TRUE);
+}
+
+/**
+ * Determines the link caption based on the filter behavior setting.
+ */
+function _shortener_url_behavior($match, $partial = FALSE, $behavior = NULL, $max_length = NULL) {
+  static $_behavior;
+  if ($behavior !== NULL) {
+    $_behavior = $behavior;
+  }
+  static $_max_length;
+  if ($max_length !== NULL) {
+    $_max_length = $max_length;
+  }
+
+  if (!empty($match)) {
+    $match[2] = decode_entities($match[2]);
+    $caption = '';
+    $href = $match[2];
+    $title = check_url($match[2]);
+    if ($_behavior == 'short' || $_behavior == 'strict') {
+      $caption = shorten_url($match[2]);
+      $href = $caption;
+    }
+    else {
+      $caption = check_plain(_filter_url_trim($match[2]));
+      if ($partial) {
+        $href = 'http://'. check_url($match[2]);
+      }
+      $title = shorten_url($match[2]);
+    }
+    return $match[1] .'<a href="'. $href .'" title="'. $title .'" class="shortener-length-'. $_max_length .' shortener-link shortener-'. $_behavior .'">'. $caption .'</a>'. $match[$partial ? 3 : 5];
+  }
+  return '';
+}
+
+/**
+ * Builds the settings form for the input filter.
+ */
+function _shortener_url_settings($format) {
+  $form['shortener_urlfilter'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('URL shortener'),
+    '#collapsible' => TRUE,
+  );
+  $form['shortener_urlfilter']['shortener_url_behavior_'. $format] = array(
+    '#type' => 'radios',
+    '#title' => t('Behavior'),
+    '#default_value' => variable_get('shortener_url_behavior_'. $format, 'short'),
+    '#options' => array(
+      'short' => t('Display the shortened URL by default, and add an "(expand)"/"(shorten)" link'),
+      'strict' => t('Display the shortened URL by default, and do not allow expanding it'),
+      'long' => t('Display the full URL by default, and add a "(shorten)"/"(expand)" link'),
+    ),
+  );
+  $form['shortener_urlfilter']['shortener_url_length_'. $format] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum link text length'),
+    '#default_value' => variable_get('shortener_url_length_'. $format, 72),
+    '#maxlength' => 4,
+    '#description' => t('URLs longer than this number of characters will be truncated to prevent long strings that break formatting. The link itself will be retained; just the text portion of the link will be truncated.'),
+  );
+  return $form;
+}
