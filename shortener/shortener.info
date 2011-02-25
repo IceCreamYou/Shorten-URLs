@@ -1,4 +1,3 @@
-; $Id$
 name = Shorten URLs Input Filter
 description = "Provides an input filter that replaces URLs with a shortened version."
 core = 7.x
