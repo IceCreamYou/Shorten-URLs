@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Restricts access to viewing the IP address field.
