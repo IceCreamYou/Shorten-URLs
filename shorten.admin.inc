@@ -9,7 +9,8 @@
  * Returns HTML representing the shorten admin form.
  */
 function shorten_admin_form() {
-  return drupal_render(drupal_get_form('shorten_admin'));
+  $form = drupal_get_form('shorten_admin');
+  return drupal_render($form);
 }
 
 /**
