@@ -62,6 +62,7 @@ function shorten_block_info() {
   $blocks['shorten']['visibility'] = 0;
   $blocks['shorten']['pages'] = 'shorten';
   $blocks['shorten_short']['info'] = t('Short URL');
+  $blocks['shorten_short']['cache'] = DRUPAL_CACHE_PER_PAGE;
   return $blocks;
 }
 
@@ -443,7 +444,7 @@ function shorten_form_shorten($form, &$form_state) {
     '#markup' => '<div id="shorten_replace">',
   );
   if (!isset($form_state['storage'])) {
-    $form_state['storage']  = array('step' => 0);
+    $form_state['storage'] = array('step' => 0);
   }
   if (isset($form_state['storage']['short_url'])) {
     // This whole "step" business keeps the form element from being cached.
