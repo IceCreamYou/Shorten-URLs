@@ -47,7 +47,7 @@ function shorten_admin($form, $form_state) {
     $form['shorten_service'] = array(
       '#type' => 'radios',
       '#title' => t('Service'),
-      '#description' => t('The service to use to create the abbreviated URL.'),
+      '#description' => t('The default service to use to create the abbreviated URL.'),
       '#default_value' => 'none',
       '#options' => array('none' => t('None')),
     );
@@ -76,7 +76,8 @@ function shorten_admin($form, $form_state) {
     $form['shorten_service'] = array(
       '#type' => 'select',
       '#title' => t('Service'),
-      '#description' => t('The default service to use to create the abbreviated URL.'),
+      '#description' => t('The default service to use to create the abbreviated URL.') .' '.
+        t('If a service is not shown in this list, you probably need to configure it in the Shorten API Keys tab.'),
       '#default_value' => variable_get('shorten_service', 'is.gd'),
       '#options' => $services,
     );
