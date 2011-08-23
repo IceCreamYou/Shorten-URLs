@@ -15,6 +15,14 @@ function shorten_schema() {
 }
 
 /**
+ * Implementation of hook_update_N().
+ */
+function shorten_update_6001() {
+  // The settings pages moved, so we need to rebuild the menu router cache.
+  menu_cache_clear_all();
+}
+
+/**
  * Implements hook_uninstall().
  */
 function shorten_uninstall() {

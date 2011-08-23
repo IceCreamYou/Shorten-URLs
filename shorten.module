@@ -23,20 +23,20 @@ function shorten_help($path, $arg) {
  */
 function shorten_menu() {
   $items = array();
-  $items['admin/config/shorten'] = array(
+  $items['admin/config/services/shorten'] = array(
     'title' => 'Shorten',
     'description' => 'Adjust certain display settings for Shorten.',
     'page callback' => 'shorten_admin_form',
     'access arguments' => array('administer site configuration'),
     'file' => 'shorten.admin.inc',
   );
-  $items['admin/config/shorten/general'] = array(
+  $items['admin/config/services/shorten/general'] = array(
     'title' => 'General',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'access arguments' => array('administer site configuration'),
     'weight' => -1,
   );
-  $items['admin/config/shorten/keys'] = array(
+  $items['admin/config/services/shorten/keys'] = array(
     'title' => 'Shorten API Keys',
     'description' => 'Fill in API keys to use certain services.',
     'page callback' => 'shorten_keys_form',

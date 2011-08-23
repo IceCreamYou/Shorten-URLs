@@ -10,7 +10,7 @@
  */
 function record_shorten_menu() {
   $items = array();
-  $items['admin/config/shorten/records'] = array(
+  $items['admin/config/services/shorten/records'] = array(
     'title' => 'Shortened URLs',
     'description' => 'Lists shortened URLs.',
     'page callback' => 'theme',
