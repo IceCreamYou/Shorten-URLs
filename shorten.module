@@ -640,26 +640,31 @@ function _shorten_method_default() {
 }
 
 /**
- * Implements hook_token_list().
+ * Implements hook_token_info().
  */
-function shorten_token_list($type = 'all') {
-  if ($type == 'node' && variable_get('shorten_generate_token', 1)) {
-    $tokens['shorten'] = array(
-      'url' => t('The shortened URL for the node.'),
-    );
-    return $tokens;
+function shorten_token_info() {
+  if (variable_get('shorten_generate_token', 1)) {
+    $return['tokens']['node']['short-url'] = array(
+      'name' => t('Short Url'),
+      'description' => t('The shortened URL for the node.'),
+    );  
+    return $return;
   }
 }
 
 /**
- * Implements hook_token_values().
+ * Implements hook_tokens().
  */
-function shorten_token_values($type, $data = NULL, $options = array()) {
-  if ($type == 'node' && variable_get('shorten_generate_token', 1)) {
-    //Casting $data to an object may not be necessary.
-    $data = (object) $data;
-    return array(
-      'url' => shorten_url(url('node/' . $data->nid, array('absolute' => TRUE, 'alias' => variable_get('shorten_use_alias', 1)))),
-    );
+function shorten_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  if ($type == 'node'
+  && !empty($data['node'])
+  && isset($tokens['short-url'])
+  && variable_get('shorten_generate_token', 1)) {
+    $node = (object) $data['node'];
+    $replacements[$tokens['short-url']] = shorten_url(url('node/' . $node->nid, array(
+      'absolute' => TRUE,
+      'alias' => variable_get('shorten_use_alias', 1),
+    )));
   }
+  return $replacements;
 }
