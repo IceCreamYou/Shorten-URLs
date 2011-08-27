@@ -140,13 +140,13 @@ function shorten_url($original = '', $service = '') {
   }
   $services = module_invoke_all('shorten_service');
   if (isset($services[$service])) {
-    $url = _shorten_get_url($original, $services[$service]);
+    $url = _shorten_get_url($original, $services[$service], $service);
   }
   // If the primary service fails, try the secondary service.
   if (!$url) {
     $service = variable_get('shorten_service_backup', 'TinyURL');
     if (isset($services[$service])) {
-      $url = _shorten_get_url($original, $services[$service]);
+      $url = _shorten_get_url($original, $services[$service], $service);
     }
     // If the secondary service fails, use the original URL.
     if (!$url) {
@@ -193,10 +193,13 @@ function shorten_url($original = '', $service = '') {
  * @param $api
  *   A string or array used to retrieve a shortened URL. If it is an array, it
  *   can have the elements 'custom,' 'url,' 'tag,' 'json,' and 'args.'
+ * @param $service
+ *   The service to use to abbreviate the URL.
+ *   For services available by default, see shorten_shorten_service().
  * @return
  *   An abbreviated URL.
  */
-function _shorten_get_url($original, $api) {
+function _shorten_get_url($original, $api, $service) {
   $method = drupal_strtoupper(variable_get('shorten_method', _shorten_method_default()));
   $service = t('an unknown service');
   if (is_string($api)) {
