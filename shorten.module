@@ -659,6 +659,7 @@ function shorten_token_info() {
  * Implements hook_tokens().
  */
 function shorten_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
   if ($type == 'node'
   && !empty($data['node'])
   && isset($tokens['short-url'])
