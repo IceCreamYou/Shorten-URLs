@@ -279,6 +279,11 @@ function shorten_shorten_service() {
       variable_get('shorten_bitly_login', '') . '&x_apiKey=' .
       variable_get('shorten_bitly_key', '') . '&longUrl=';
   }
+  if (variable_get('shorten_googl', '')) {
+    $services['goo.gl'] = array(
+      'custom' => '_shorten_googl',
+    );
+  }
   $services += array(
     'fwd4.me' => 'http://api.fwd4.me/?url=',
     'cli.gs' => 'http://cli.gs/api/v1/cligs/create?appid=drupal&url=',
@@ -350,6 +355,27 @@ function _shorten_adjix($original) {
 }
 
 /**
+ * Helps get a shortened URL from Goo.gl.
+ */
+function _shorten_googl($original) {
+  $url = 'https://www.googleapis.com/urlshortener/v1/url?key='. variable_get('shorten_googl', '');
+  $context = stream_context_create();
+  stream_context_set_option($context, 'ssl', 'verify_host', TRUE);
+  $options = array(
+    'method' => 'POST',
+    'data' => json_encode(array('longUrl' => $original)),
+    'context' => $context,
+    'headers' => array('Content-type' => 'application/json'),
+  );
+  $googl = shorten_fetch($url, 'id', 'json', $options);
+  if ($googl) {
+    return $googl;
+  }
+  watchdog('shorten', 'Error fetching shortened URL from goo.gl.', array(), WATCHDOG_ERROR, $url);
+  return FALSE;
+}
+
+/**
  * Helps get a shortened URL via the Short URLs module.
  */
 function _shorten_shorturl($original) {
@@ -374,21 +400,68 @@ function _shorten_shurly($original) {
  *   If the response is XML, the tag within which to look for the shortened URL.
  * @param $special
  *   A special format the service will return. Currently only supports 'json.'
+ * @param $options
+ *   An associative array of options to allow executing an advanced request.
+ *   Valid keys include anything that would work with drupal_http_request()
+ *   except that $options['context'] is only used with the PHP request method.
  * @return
  *   An abbreviated URL or FALSE if fetching the abbreviated URL fails.
  */
-function shorten_fetch($url, $tag = '', $special = '') {
+function shorten_fetch($url, $tag = '', $special = '', $options = array()) {
+  $options += array(
+    'headers' => array(),
+    'method' => 'GET',
+    'data' => NULL,
+    'max_redirects' => 3,
+    'timeout' => 3.0,
+    'context' => NULL, // only used with the PHP method
+  );
   if (variable_get('shorten_method', _shorten_method_default()) == 'php') {
-    $result = drupal_http_request($url, array('timeout' => 3));
+    $result = drupal_http_request($url, $options);
     $contents = $result->data;
-    // $context = stream_context_create(array('http' => array('timeout' => 3)));
-    // $contents = file_get_contents($url, 0, $context);
+    if (!empty($result->error)) {
+      watchdog(
+        'shorten',
+        '@code error shortening the URL @url using the PHP request method. Error message: %error',
+        array('@code' => $result->code, '@url' => $url, '%error' => $result->error),
+        WATCHDOG_ERROR,
+        $url
+      );
+    }
   }
   elseif (variable_get('shorten_method', _shorten_method_default()) == 'curl') {
     $c = curl_init();
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 3);
+    curl_setopt($c, CURLOPT_CONNECTTIMEOUT, $options['timeout']);
+    curl_setopt($c, CURLOPT_FOLLOWLOCATION, TRUE);
+    curl_setopt($c, CURLOPT_MAXREDIRS, $options['max_redirects']);
     curl_setopt($c, CURLOPT_URL, $url);
+    if ($options['method'] != 'GET') {
+      $uri = @parse_url($url);
+      if ($uri['scheme'] == 'http') {
+        curl_setopt($c, CURLOPT_PORT, isset($uri['port']) ? $uri['port'] : 80);
+        curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTP);
+      }
+      elseif ($uri['scheme'] == 'https') {
+        curl_setopt($c, CURLOPT_PORT, isset($uri['port']) ? $uri['port'] : 443);
+        curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+      }
+      if (!empty($options['headers'])) {
+        $curl_headers = array();
+        foreach ($options['headers'] as $key => $value) {
+          $curl_headers[] = trim($key) . ': ' . trim($value);
+        }
+        curl_setopt($c, CURLOPT_HTTPHEADER, $curl_headers);
+      }
+      if ($options['method'] == 'POST') {
+        curl_setopt($c, CURLOPT_POST, TRUE);
+        curl_setopt($c, CURLOPT_POSTFIELDS, $options['data']);
+      }
+      else {
+        curl_setopt($c, CURLOPT_CUSTOMREQUEST, $options['method']);
+      }
+      curl_setopt($c, CURLOPT_SSL_VERIFYPEER, FALSE);
+    }
     $contents = curl_exec($c);
     curl_close($c);
   }

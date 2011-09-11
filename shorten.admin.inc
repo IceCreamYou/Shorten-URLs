@@ -233,6 +233,11 @@ function shorten_keys($form, $form_state) {
     '#title' => t('Fwd4.me API Key'),
     '#default_value' => variable_get('shorten_fwd4me', ''),
   );
+  $form['shorten_googl'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Goo.gl API Key'),
+    '#default_value' => variable_get('shorten_googl', ''),
+  );
   $form['shorten_redirec'] = array(
     '#type' => 'textfield',
     '#title' => t('Redir.ec API Key'),

@@ -30,6 +30,7 @@ function shorten_uninstall() {
   variable_del('shorten_www');
   variable_del('shorten_adjix');
   variable_del('shorten_cligs');
+  variable_del('shorten_googl');
   variable_del('shorten_budurl');
   variable_del('shorten_fwd4me');
   variable_del('shorten_method');
