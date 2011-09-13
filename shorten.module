@@ -135,7 +135,7 @@ function shorten_url($original = '', $service = '') {
     $service = variable_get('shorten_service', 'is.gd');
   }
   $cached = cache_get($original, 'cache_shorten');
-  if (!empty($cached->data)) {
+  if (!empty($cached->data) && REQUEST_TIME < $cached->expire) {
     return $cached->data;
   }
   $services = module_invoke_all('shorten_service');
@@ -170,9 +170,9 @@ function shorten_url($original = '', $service = '') {
     }
   }
   $cache_duration = variable_get('shorten_cache_duration', 1814400);
-  // Only cache failed retrievals for 30 minutes.
+  // Only cache failed retrievals for a limited amount of time.
   if ($url == $original) {
-    $expire = REQUEST_TIME + 1800;
+    $expire = REQUEST_TIME + variable_get('shorten_cache_fail_duration', 1800);
   }
   elseif (is_numeric($cache_duration)) {
     $expire = REQUEST_TIME + $cache_duration;

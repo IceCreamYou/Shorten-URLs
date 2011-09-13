@@ -45,4 +45,5 @@ function shorten_uninstall() {
   variable_del('shorten_generate_token');
   variable_del('shorten_service_backup');
   variable_del('shorten_invisible_services');
+  variable_del('shorten_cache_fail_duration');
 }

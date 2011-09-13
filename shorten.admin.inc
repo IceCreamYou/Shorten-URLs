@@ -123,6 +123,17 @@ function shorten_admin($form, $form_state) {
     '#size' => 11,
     '#default_value' => variable_get('shorten_cache_duration', 1814400),
   );
+  $form['shorten_cache_fail_duration'] = array(
+    '#type' => 'textfield',
+    '#field_prefix' => t('On failure, cache full URLs for') . ' ',
+    '#field_suffix' => ' ' . t('seconds'),
+    '#description' => t('When a shortener service is unavilable, the full URL will be cached temporarily to prevent more requests from overloading the server.') .' '.
+      t('Enter the number of seconds for which you would like to store these full URLs when shortening the URL fails.') .' '.
+      t('The default value is 1800 (30 minutes).'),
+    '#size' => 11,
+    '#required' => TRUE,
+    '#default_value' => variable_get('shorten_cache_fail_duration', 1800),
+  );
   unset($services['none']);
   $form['shorten_invisible_services'] = array(
     '#type' => 'checkboxes',
@@ -158,6 +169,13 @@ function shorten_admin_validate($form, &$form_state) {
     $v['shorten_cache_duration'] < 0
   )) {
     form_set_error('shorten_cache_duration', t('The cache duration must be a positive integer or left blank.'));
+  }
+  if ($v['shorten_cache_fail_duration'] !== '' && (
+    !is_numeric($v['shorten_cache_fail_duration']) ||
+    round($v['shorten_cache_fail_duration']) != $v['shorten_cache_fail_duration'] ||
+    $v['shorten_cache_fail_duration'] < 0
+  )) {
+    form_set_error('shorten_cache_fail_duration', t('The cache fail duration must be a positive integer.'));
   }
 }
 
