@@ -413,7 +413,7 @@ function shorten_fetch($url, $tag = '', $special = '', $options = array()) {
     'method' => 'GET',
     'data' => NULL,
     'max_redirects' => 3,
-    'timeout' => 3.0,
+    'timeout' => variable_get('shorten_timeout', 3),
     'context' => NULL, // only used with the PHP method
   );
   if (variable_get('shorten_method', _shorten_method_default()) == 'php') {

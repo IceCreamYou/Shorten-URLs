@@ -112,9 +112,22 @@ function shorten_admin($form, $form_state) {
       . ' <strong>' . t('Some integrated modules ignore this.') . '</strong>',
     '#default_value' => variable_get('shorten_use_alias', 1),
   );
+  $form['shorten_timeout'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Time out URL shortening requests after'),
+    '#field_suffix' => ' ' . t('seconds'),
+    '#description' => t('Cancel retrieving a shortened URL if the URL shortening service takes longer than this amount of time to respond.') . ' ' .
+      t('Lower values (or shorter timeouts) mean your site will respond more quickly if your URL shortening service is down.') . ' ' .
+      t('However, higher values (or longer timeouts) give the URL shortening service more of a chance to return a value.') . ' ' .
+      t('If a request to the primary service times out, the secondary service is used. If the secondary service times out, the original (long) URL is used.') . ' ' .
+      t('You must enter a nonnegative integer. Enter 0 (zero) to wait for a response indefinitely.'),
+    '#size' => 3,
+    '#required' => TRUE,
+    '#default_value' => variable_get('shorten_timeout', 3),
+  );
   $form['shorten_cache_duration'] = array(
     '#type' => 'textfield',
-    '#field_prefix' => t('Cache shortened URLs for') . ' ',
+    '#title' => t('Cache shortened URLs for'),
     '#field_suffix' => ' ' . t('seconds'),
     '#description' => t('Shortened URLs are stored after retrieval to improve performance.') . ' ' .
       t('Enter the number of seconds for which you would like the shortened URLs to be stored.') . ' ' .
@@ -125,7 +138,7 @@ function shorten_admin($form, $form_state) {
   );
   $form['shorten_cache_fail_duration'] = array(
     '#type' => 'textfield',
-    '#field_prefix' => t('On failure, cache full URLs for') . ' ',
+    '#title' => t('On failure, cache full URLs for'),
     '#field_suffix' => ' ' . t('seconds'),
     '#description' => t('When a shortener service is unavilable, the full URL will be cached temporarily to prevent more requests from overloading the server.') .' '.
       t('Enter the number of seconds for which you would like to store these full URLs when shortening the URL fails.') .' '.
@@ -170,12 +183,15 @@ function shorten_admin_validate($form, &$form_state) {
   )) {
     form_set_error('shorten_cache_duration', t('The cache duration must be a positive integer or left blank.'));
   }
-  if ($v['shorten_cache_fail_duration'] !== '' && (
+  if (
     !is_numeric($v['shorten_cache_fail_duration']) ||
     round($v['shorten_cache_fail_duration']) != $v['shorten_cache_fail_duration'] ||
     $v['shorten_cache_fail_duration'] < 0
-  )) {
+  ) {
     form_set_error('shorten_cache_fail_duration', t('The cache fail duration must be a positive integer.'));
+  }
+  if (!is_numeric($v['shorten_timeout']) || round($v['shorten_timeout']) != $v['shorten_timeout'] || $v['shorten_timeout'] < 0) {
+    form_set_error('shorten_timeout', t('The timeout duration must be a nonnegative integer.'));
   }
 }
 
