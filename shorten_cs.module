@@ -21,7 +21,7 @@ function shorten_cs_menu() {
   $items['admin/config/services/shorten/custom/edit/%shorten_cs'] = array(
     'title' => 'Edit custom service',
     'page callback' => 'shorten_cs_edit_form',
-    'page arguments' => array(5),
+    'page arguments' => array(6),
     'access arguments' => array('administer Shorten URLs custom services'),
     'type' => MENU_CALLBACK,
     'file' => 'shorten_cs.admin.inc',
@@ -29,7 +29,7 @@ function shorten_cs_menu() {
   $items['admin/config/services/shorten/custom/delete/%shorten_cs'] = array(
     'title' => 'Custom services',
     'page callback' => 'shorten_cs_delete_form',
-    'page arguments' => array(5),
+    'page arguments' => array(6),
     'access arguments' => array('administer Shorten URLs custom services'),
     'type' => MENU_CALLBACK,
     'file' => 'shorten_cs.admin.inc',

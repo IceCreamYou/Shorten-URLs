@@ -21,8 +21,8 @@ function shorten_cs_services_table() {
   $result = db_query("SELECT * FROM {shorten_cs} ORDER BY name ASC")->fetchAll();
   foreach ($result as $service) {
     $service = (array) $service;
-    $service['actions'] = l(t('edit'), 'admin/config/shorten/custom/edit/' . $service['sid']) . ' ' .
-      l(t('delete'), 'admin/config/shorten/custom/delete/' . $service['sid']);
+    $service['actions'] = l(t('edit'), 'admin/config/services/shorten/custom/edit/' . $service['sid']) . ' ' .
+      l(t('delete'), 'admin/config/services/shorten/custom/delete/' . $service['sid']);
     unset($service['sid']);
     $rows[] = $service;
   }
@@ -92,6 +92,16 @@ function shorten_cs_add_form_validate($form, $form_state) {
   if ($exists > 0) {
     form_set_error('name', t('A service with that name already exists.'));
   }
+  else {
+    $all_services = module_invoke_all('shorten_service');
+    $all_services['none'] = t('None');
+    foreach ($all_services as $key => $value) {
+      if ($key == $v['name']) {
+        form_set_error('name', t('A service with that name already exists.'));
+        break;
+      }
+    }
+  }
 }
 
 /**
@@ -125,6 +135,10 @@ function shorten_cs_edit($form, &$form_state, $service) {
     '#type' => 'value',
     '#value' => $service->sid,
   );
+  $form['old_name'] = array(
+    '#type' => 'value',
+    '#value' => $service->name,
+  );
   return $form;
 }
 
@@ -140,6 +154,16 @@ function shorten_cs_edit_validate($form, $form_state) {
   if ($exists > 0) {
     form_set_error('name', t('A service with that name already exists.'));
   }
+  else {
+    $all_services = module_invoke_all('shorten_service');
+    $all_services['none'] = t('None');
+    foreach ($all_services as $key => $value) {
+      if ($key == $v['name']) {
+        form_set_error('name', t('A service with that name already exists.'));
+        break;
+      }
+    }
+  }
 }
 
 /**
@@ -152,8 +176,14 @@ function shorten_cs_edit_submit($form, $form_state) {
     $record[$key] = $v[$key];
   }
   drupal_write_record('shorten_cs', $record, 'sid');
+  if ($v['old_name'] == variable_get('shorten_service', 'is.gd')) {
+    variable_set('shorten_service', $v['name']);
+  }
+  if ($v['old_name'] == variable_get('shorten_service_backup', 'TinyURL')) {
+    variable_set('shorten_service', $v['name']);
+  }
   drupal_set_message(t('The changes to service %service have been saved.', array('%service' => $record['name'])));
-  $_GET['destination'] = 'admin/config/shorten/custom';
+  $_GET['destination'] = 'admin/config/services/shorten/custom';
 }
 
 /**
@@ -172,7 +202,7 @@ function shorten_cs_delete($form, &$form_state, $service) {
     '#value' => $service->name,
   );
   $form['#submit'] = array('shorten_cs_delete_submit');
-  return confirm_form($form, t('Are you sure you want to delete the custom service %service?', array('%service' => $service->name)), 'admin/config/shorten/custom');
+  return confirm_form($form, t('Are you sure you want to delete the custom service %service?', array('%service' => $service->name)), 'admin/config/services/shorten/custom');
 }
 
 /**
@@ -180,9 +210,27 @@ function shorten_cs_delete($form, &$form_state, $service) {
  */
 function shorten_cs_delete_submit($form, $form_state) {
   $service = $form_state['values']['service'];
+  if ($service == variable_get('shorten_service', 'is.gd')) {
+    if (variable_get('shorten_service_backup', 'TinyURL') == 'is.gd') {
+      variable_set('shorten_service', 'TinyURL');
+    }
+    else {
+      variable_set('shorten_service', 'is.gd');
+    }
+    drupal_set_message(t('The default URL shortening service was deleted, so it has been reset to @service.', array('@service' => variable_get('shorten_service', 'is.gd'))));
+  }
+  if ($service == variable_get('shorten_service_backup', 'TinyURL')) {
+    if (variable_get('shorten_service', 'is.gd') == 'TinyURL') {
+      variable_set('shorten_service_backup', 'is.gd');
+    }
+    else {
+      variable_set('shorten_service_backup', 'TinyURL');
+    }
+    drupal_set_message(t('The backup URL shortening service was deleted, so it has been reset to @service.', array('@service' => variable_get('shorten_service_backup', 'TinyURL'))));
+  }
   db_delete('shorten_cs')
     ->condition('name', $service)
     ->execute();
   drupal_set_message(t('The service %service has been deleted.', array('%service' => $service)));
-  $_GET['destination'] = 'admin/config/shorten/custom';
+  $_GET['destination'] = 'admin/config/services/shorten/custom';
 }
