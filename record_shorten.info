@@ -1,6 +1,7 @@
 name = Record Shorten
 description = "Records shortened URLs from the Shorten module."
 core = 7.x
+package = Shorten URLs
 configure = admin/reports/shorten
 dependencies[] = shorten
 
