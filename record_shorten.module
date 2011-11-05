@@ -10,7 +10,7 @@
  */
 function record_shorten_menu() {
   $items = array();
-  $items['admin/config/services/shorten/records'] = array(
+  $items['admin/reports/shorten'] = array(
     'title' => 'Shortened URLs',
     'description' => 'Lists shortened URLs.',
     'page callback' => 'theme',
@@ -64,10 +64,10 @@ function theme_record_shorten_records() {
  */
 function record_shorten_clear_all($form, $form_state) {
   $form['warning'] = array(
-    '#value' => '<p><strong>' . t('Warning: there is no confirmation page. Cleared records are permanently deleted.') . '</strong></p>',
+    '#markup' => '<p><strong>' . t('Warning: there is no confirmation page. Cleared records are permanently deleted.') . '</strong></p>',
   );
   $form['note'] = array(
-    '#value' => '<p>' . t('Note: clearing records does not clear the Shorten URLs cache.') . ' ' .
+    '#markup' => '<p>' . t('Note: clearing records does not clear the Shorten URLs cache.') . ' ' .
       t('Also, URLs already in the cache are not recorded again.') . '</p>',
   );
   $form['clear'] = array(

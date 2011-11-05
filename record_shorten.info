@@ -1,7 +1,7 @@
 name = Record Shorten
 description = "Records shortened URLs from the Shorten module."
 core = 7.x
-configure = admin/config/services/shorten/records
+configure = admin/reports/shorten
 dependencies[] = shorten
 
 files[] = record_shorten.install
