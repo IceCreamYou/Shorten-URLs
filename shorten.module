@@ -252,11 +252,6 @@ function _shorten_get_url($original, $api, $service) {
  */
 function shorten_shorten_service() {
   $services = array();
-  if (variable_get('shorten_adjix', '')) {
-    $services['Adjix.com'] = array(
-      'custom' => '_shorten_adjix',
-    );
-  }
   if (variable_get('shorten_budurl', '')) {
     $services['budurl'] = array(
       'url' => 'http://budurl.com/api/v1/budurls/shrink?api_key=' . variable_get('shorten_budurl', '') . '&format=txt&long_url=',
@@ -285,28 +280,15 @@ function shorten_shorten_service() {
     );
   }
   $services += array(
-    'fwd4.me' => 'http://api.fwd4.me/?url=',
     'cli.gs' => 'http://cli.gs/api/v1/cligs/create?appid=drupal&url=',
-    'hex.io' => 'http://hex.io/api-create.php?url=',
-    'idek.net' => 'http://idek.net/c.php?idek-api=true&idek-ref=drupal&idek-url=',
     'is.gd' => 'http://is.gd/api.php?longurl=',
-    'lin.cr' => 'http://lin.cr/?mode=api&full=1&l=',
     'migre.me' => 'http://migre.me/api.txt?url=',
     'Metamark' => 'http://metamark.net/api/rest/simple?long_url=',
     'PeekURL' => 'http://peekurl.com/api.php?desturl=',
-    'PiURL' => 'http://piurl.com/api.php?url=',
     'qr.cx' => 'http://qr.cx/api/?longurl=',
     'redir.ec' => 'http://redir.ec/_api/rest/redirec/create?appid=drupal&url=',
-    'retwt.me' => array('custom' => 'xml', 'url' => 'http://api.retwt.me/shorten.xml?longUrl=', 'tag' => 'shortUrl'),
     'ri.ms' => 'http://ri.ms/api-create.php?url=',
-    'short.ie' => 'http://short.ie/api?format=plain&url=',
-    'surl.me' => 'http://surl.me/api-create.php?url=',
-    'th8.us' => 'http://th8.us/api.php?url=',
     'TinyURL' => 'http://tinyurl.com/api-create.php?url=',
-    'tr.im' => 'http://api.tr.im/api/trim_simple?url=',
-    'urlb.at' => 'http://urlb.at/api/rest/?url=',
-    'urlCover' => 'http://urlcover.com/api.php?link=',
-    'urlShort' => 'http://u.mavrev.com/api.php?url=',
   );
   if (module_exists('shorturl')) {
     $services['Drupal ShortURL module'] = array(
@@ -330,28 +312,6 @@ function shorten_shorten_service() {
   // Alphabetize. ksort() is case-sensitive.
   uksort($services, 'strcasecmp');
   return $services;
-}
-
-/**
- * Helps get a shortened URL from adjix.
- */
-function _shorten_adjix($original) {
-  if (!variable_get('shorten_adjix_custom', '')) {
-    $url = 'http://api.adjix.com/shrinkLink?ultraShort=y&partnerID=' . variable_get('shorten_adjix', '') . '&url=' . $original;
-    $adjix = shorten_fetch($url);
-    if ($adjix) {
-      return $adjix;
-    }
-  }
-  else {
-    $url = 'http://api.adjix.com/shrinkLink?tokenOnly=y&partnerID=' . variable_get('shorten_adjix', '') . '&url=' . $original;
-    $adjix = shorten_fetch($url);
-    if ($adjix) {
-      return variable_get('shorten_adjix_custom', '') . $adjix;
-    }
-  }
-  watchdog('shorten', 'Error fetching shortened URL from adjix.', array(), WATCHDOG_ERROR, $url);
-  return FALSE;
 }
 
 /**
