@@ -212,7 +212,7 @@ function _shorten_get_url($original, $api, $service) {
       'custom' => FALSE,
       'json' => FALSE,
     );
-    if ($api['url']) {
+    if (!empty($api['url'])) {
       // Typically $api['custom'] == 'xml' although it doesn't have to.
       if (!empty($api['tag'])) {
         $url = shorten_fetch($api['url'] . $original, $api['tag']);
@@ -227,7 +227,7 @@ function _shorten_get_url($original, $api, $service) {
     }
     elseif (is_string($api['custom']) && function_exists($api['custom'])) {
       $method =  t('A custom method: @method()', array('@method' => $api['custom']));
-      if (is_array($api['args'])) {
+      if (!empty($api['args']) && is_array($api['args'])) {
         $args = $api['args'];
         array_unshift($args, $original);
         $url = call_user_func_array($api['custom'], $args);
