@@ -56,6 +56,7 @@ function record_shorten_views_default_views() {
         'text' => '',
         'make_link' => 1,
         'path' => '[short]',
+        'external' => 1,
         'link_class' => '',
         'alt' => '',
         'prefix' => '',
