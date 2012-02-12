@@ -378,7 +378,7 @@ function shorten_fetch($url, $tag = '', $special = '', $options = array()) {
   );
   if (variable_get('shorten_method', _shorten_method_default()) == 'php') {
     $result = drupal_http_request($url, $options);
-    $contents = $result->data;
+    $contents = isset($result->data) ? $result->data : NULL;
     if (!empty($result->error)) {
       watchdog(
         'shorten',
