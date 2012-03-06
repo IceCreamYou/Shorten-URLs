@@ -400,11 +400,11 @@ function shorten_fetch($url, $tag = '', $special = '', $options = array()) {
       $uri = @parse_url($url);
       if ($uri['scheme'] == 'http') {
         curl_setopt($c, CURLOPT_PORT, isset($uri['port']) ? $uri['port'] : 80);
-        curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTP);
+        //curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTP);
       }
       elseif ($uri['scheme'] == 'https') {
         curl_setopt($c, CURLOPT_PORT, isset($uri['port']) ? $uri['port'] : 443);
-        curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+        //curl_setopt($c, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
       }
       if (!empty($options['headers'])) {
         $curl_headers = array();
