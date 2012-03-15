@@ -393,7 +393,7 @@ function shorten_fetch($url, $tag = '', $special = '', $options = array()) {
     $c = curl_init();
     curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($c, CURLOPT_CONNECTTIMEOUT, $options['timeout']);
-    curl_setopt($c, CURLOPT_FOLLOWLOCATION, TRUE);
+    //curl_setopt($c, CURLOPT_FOLLOWLOCATION, TRUE);
     curl_setopt($c, CURLOPT_MAXREDIRS, $options['max_redirects']);
     curl_setopt($c, CURLOPT_URL, $url);
     if ($options['method'] != 'GET') {
