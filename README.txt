@@ -35,9 +35,9 @@ SUBMODULES
 
 This package contains two submodules: Record Shortened URLs and Shorten URLs
 Custom Services. The first keeps track of which URLs have been shortened and
-displays them to administrators at admin/settings/shorten/records; the second
-allows administrators to add custom URL shortening services through the
-user interface (instead of using the API).
+displays them to administrators at admin/reports/shorten; the second allows
+administrators to add custom URL shortening services through the user interface
+(instead of using the API).
 
 ===
 API
