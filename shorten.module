@@ -111,7 +111,10 @@ function shorten_permission() {
  * Implements hook_flush_caches().
  */
 function shorten_flush_caches() {
-  return array('cache_shorten');
+  if (variable_get('shorten_cache_clear_all', TRUE)) {
+    return array('cache_shorten');
+  }
+  return array();
 }
 
 /**
