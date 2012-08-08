@@ -75,9 +75,12 @@ function shorten_cs_theme($existing, $type, $theme, $path) {
  */
 function shorten_cs_permission() {
   return array(
+    // This permission allows tricking users into visiting a malicious site,
+    // so it is designated as "restricted access"
     'administer Shorten URLs custom services' => array(
       'title' => t('Administer custom services'),
       'description' => t('Add and remove custom URL shortening services.'),
+      'restrict access' => TRUE,
     ),
   );
 }

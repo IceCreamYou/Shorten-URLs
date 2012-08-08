@@ -102,7 +102,7 @@ function record_shorten_records_table() {
     ->execute();
   foreach ($result as $row) {
     // Sigh... DBTNG doesn't have a ->fetchAsNonAssocArray()
-    $rows[] = array($row->original, $row->short, $row->service);
+    $rows[] = array(check_plain($row->original), check_plain($row->short), check_plain($row->service));
   }
   $output = theme('table', array('header' => $header, 'rows' => $rows));
   // Oddly, theme_pager($vars) has no defaults for $vars.
