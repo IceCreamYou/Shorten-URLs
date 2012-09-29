@@ -9,7 +9,8 @@
  * Themes the configuration page.
  */
 function theme_shorten_cs_admin() {
-  return shorten_cs_services_table() . drupal_render(drupal_get_form('shorten_cs_add_form'));
+  $form = drupal_get_form('shorten_cs_add_form');
+  return shorten_cs_services_table() . drupal_render($form);
 }
 
 /**
@@ -127,7 +128,8 @@ function shorten_cs_add_form_submit($form, $form_state) {
  * Returns HTML representing the shorten service edit form.
  */
 function shorten_cs_edit_form($service) {
-  return drupal_render(drupal_get_form('shorten_cs_edit', $service));
+  $form = drupal_get_form('shorten_cs_edit', $service);
+  return drupal_render($form);
 }
 
 /**
@@ -197,7 +199,8 @@ function shorten_cs_edit_submit($form, $form_state) {
  * Returns HTML representing the shorten service delete form.
  */
 function shorten_cs_delete_form($service) {
-  return drupal_render(drupal_get_form('shorten_cs_delete', $service));
+  $form = drupal_get_form('shorten_cs_delete', $service);
+  return drupal_render($form);
 }
 
 /**

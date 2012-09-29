@@ -55,7 +55,8 @@ function theme_record_shorten_records() {
   $output = '<p>' . format_plural($total, '1 shortened URL has been recorded.', '@count shortened URLs have been recorded.');
   $output .= record_shorten_records_table();
   $output .= '<br />';
-  $output .= drupal_render(drupal_get_form('record_shorten_clear_all'));
+  $form = drupal_get_form('record_shorten_clear_all');
+  $output .= drupal_render($form);
   return $output;
 }
 

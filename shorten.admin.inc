@@ -216,7 +216,8 @@ function shorten_admin_submit($form, &$form_state) {
  * Returns HTML representing the shorten keys admin form.
  */
 function shorten_keys_form() {
-  return drupal_render(drupal_get_form('shorten_keys'));
+  $form = drupal_get_form('shorten_keys');
+  return drupal_render($form);
 }
 
 /**
